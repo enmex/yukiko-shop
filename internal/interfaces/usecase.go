@@ -9,3 +9,6 @@ type AuthUseCase interface {
 	SignUp(ctx context.Context, request spec.SignUpRequest) (*spec.AuthResponse, error)
 	SignIn(ctx context.Context, request spec.SignInRequest) (*spec.AuthResponse, error)
 }
+
+type ProductUseCase interface {
+}

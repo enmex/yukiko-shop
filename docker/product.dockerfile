@@ -7,7 +7,7 @@ RUN go mod download && go mod verify
 
 COPY . .
 
-RUN go build -o main ./cmd/auth/main.go
+RUN go build -o main ./cmd/product/main.go
 
-EXPOSE 8081
+EXPOSE 8082
 ENTRYPOINT ["./main"]

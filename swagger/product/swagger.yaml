@@ -1,0 +1,8 @@
+openapi: 3.0.3
+info:
+  title: Product Service
+  description: Сервис товаров
+  version: 0.0.1
+servers:
+  - description: Local server
+    url: http://localhost:8082/

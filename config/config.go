@@ -6,9 +6,9 @@ import (
 )
 
 type Config struct {
-	DB *db.Config
-	JWT *auth.Config
-	HTTP *ConfigHTTP
+	DB       *db.Config
+	JWT      *auth.Config
+	HTTP     *ConfigHTTP
 }
 
 func NewConfig() (*Config, error) {
@@ -19,8 +19,8 @@ func NewConfig() (*Config, error) {
 	}
 
 	return &Config{
-		DB: NewDBConfig(),
-		JWT: jwtConf,
-		HTTP: NewConfigHTTP(),
+		DB:       NewDBConfig(),
+		JWT:      jwtConf,
+		HTTP:     NewConfigHTTP(),
 	}, nil
 }

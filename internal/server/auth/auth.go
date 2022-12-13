@@ -45,8 +45,6 @@ func (s Server) PostAuthSignUp(w http.ResponseWriter, r *http.Request) {
 	var request spec.SignUpRequest
 	ctx := r.Context()
 
-	s.logger.Infoln("here")
-
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
 			ErrorCode: spec.ErrorResponseErrorCodeINTERNALSERVERERROR,

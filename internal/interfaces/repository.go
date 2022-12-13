@@ -10,3 +10,7 @@ type UserRepository interface {
 	CreateUser(ctx context.Context, user *domain.User) (*ent.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*ent.User, error)
 }
+
+type ProductRepository struct {
+	
+}

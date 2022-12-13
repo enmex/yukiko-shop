@@ -12,14 +12,14 @@ import (
 )
 
 type Server struct {
-	logger     *logrus.Logger
-	authUseCase interfaces.AuthUseCase
+	logger       *logrus.Logger
+	orderUseCase interfaces.ProductUseCase
 }
 
-func NewServer(logger *logrus.Logger, orderUseCase interfaces.AuthUseCase) *Server {
+func NewServer(logger *logrus.Logger, orderUseCase interfaces.ProductUseCase) *Server {
 	return &Server{
-		logger: logger,
-		authUseCase: orderUseCase,
+		logger:       logger,
+		orderUseCase: orderUseCase,
 	}
 }
 

@@ -78,11 +78,11 @@ func (u *AuthUseCase) SignUp(ctx context.Context, request spec.SignUpRequest) (*
 		Auth: spec.UserToken{
 			Access: spec.Token{
 				Token: jwtToken,
-				ExpiresAt: expiresAt,
+				ExpiresAt: expiresAt.UnixNano(),
 			},
 			Refresh: spec.Token{
 				Token: jwtToken,
-				ExpiresAt: expiresAt,
+				ExpiresAt: expiresAt.UnixNano(),
 			},
 		},
 		Profile: *adapter.ConvertEntToDomain(userEnt),
@@ -123,11 +123,11 @@ func (u *AuthUseCase) SignIn(ctx context.Context, request spec.SignInRequest) (*
 		Auth: spec.UserToken{
 			Access: spec.Token{
 				Token: jwtToken,
-				ExpiresAt: expiresAt,
+				ExpiresAt: expiresAt.UnixMilli(),
 			},
 			Refresh: spec.Token{
 				Token: jwtToken,
-				ExpiresAt: expiresAt,
+				ExpiresAt: expiresAt.UnixMilli(),
 			},
 		},
 		Profile: *adapter.ConvertEntToDomain(userEnt),

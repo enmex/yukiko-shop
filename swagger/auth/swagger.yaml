@@ -5,7 +5,7 @@ info:
   version: 0.0.1
 servers:
   - description: Local server
-    url: http://localhost:8080/
+    url: http://localhost:8081/
   
 paths: 
   /auth/signUp:
@@ -74,8 +74,8 @@ components:
         token:
           type: string
         expiresAt:
-          type: string
-          format: date-time
+          type: integer
+          format: int64
 
     UserToken:
       required:
