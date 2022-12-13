@@ -1,0 +1,132 @@
+openapi: 3.0.3
+info:
+  title: Versioning Service
+  description: Сервис версионирования
+  version: 0.0.1
+servers:
+  - description: Local server
+    url: http://localhost:8080/
+
+paths:
+  /auth/signUp:
+    post:
+      tags:
+        - User
+      summary: Регистрация пользователя
+      description: Регистрирует пользователя в системе
+      responses:
+        201:
+          $ref: "#/components/responses/SignUpResponse"
+        400:
+          $ref: "#/components/responses/SignUpErrorResponse"
+
+components:
+  schemas:
+    User:
+      description: Пользователь
+      type: object
+      required:
+        - email
+        - nickname
+        - password
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          description: почта пользователя
+          type: string
+        nickname:
+          description: ник пользователя
+          type: string
+        password:
+          description: пароль пользователя
+          type: string
+
+    Token: 
+      description: Токен пользователя
+      required:
+        - token
+        - issued_at
+        - expires_at
+      type: object
+      properties:
+        token: 
+          description: токен
+          type: string
+        issued_at:
+          description: время создания токена
+          type: string
+        expires_at:
+          description: время протухания токена
+          type: string
+
+    SignUpResponse:
+      description: Ответ на регистрацию
+      type: object
+      required: 
+        - id
+        - token
+      properties:
+        id: 
+          type: string
+        token: 
+          $ref: "#/components/schemas/Token"
+
+    SignUpErrorResponse:
+      allOf:
+        - $ref: "#/components/schemas/Error"
+        - type: object
+          properties:
+            ErrorCode: 
+              type: string
+              enum:
+                - BAD_REQUEST
+
+    Error:
+      description: Числовой код ошибки и описание что пошло не так
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        ErrorCode:
+          type: string
+          description: >
+            Код ошибки:
+             * `BAD_REQUEST` - Некорректный запрос к серверу
+             * `VALIDATION_FAILED` - Валидация запроса к серверу не пройдена (см. attribute)
+             * `UNAUTHORIZED` - Пользователь не авторизован
+             * `FORBIDDEN` - Нет прав на выполнение операции
+             * `NOT_FOUND` - Запрашиваемый ресурс не найден
+             * `CONFLICT` - Запрос конфликтует с состоянием сервера
+             * `FOLDING_DEPTH_EXCEEDED` - Превышена глубина вложенности
+             * `CYCLIC_FOLDING` - Зацикливание вложенных элементов
+             * `INTERNAL_SERVER_ERROR` - Внутренняя ошибка сервера
+          enum:
+            - BAD_REQUEST
+            - VALIDATION_FAILED
+            - UNAUTHORIZED
+            - FORBIDDEN
+            - NOT_FOUND
+            - CONFLICT
+            - FOLDING_DEPTH_EXCEEDED
+            - CYCLIC_FOLDING
+            - INTERNAL_SERVER_ERROR
+          example: BAD_REQUEST
+        message:
+          type: string
+          description: Описание ошибки
+
+  responses:
+    SignUpResponse:
+      description: Ответ на регистрацию
+      content:
+        schema:
+          $ref: "#/components/schemas/SignUpResponse"
+
+    SignUpErrorResponse:
+      description: Ошибка при регистрации
+      content:
+        schema:
+          $ref: "#/components/schemas/SignUpErrorResponse"

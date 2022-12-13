@@ -1,0 +1,47 @@
+version: '3.9'
+volumes:
+  postgres_data:
+
+services:
+  yukiko_db:
+    container_name: yukiko_db
+    image: postgres:11.13-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME:-yukiko_db}
+      POSTGRES_USER: ${DB_USER:-user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d
+    ports:
+      - ${DB_PORT:-5432}:5432
+    networks:
+      app_network:
+        ipv4_address: 171.4.4.11
+        aliases:
+          - yukiko.postgres
+
+  auth:
+    container_name: auth
+    depends_on:
+      - yukiko_db
+    build:
+      context: .
+      dockerfile: ./docker/auth.dockerfile
+    env_file:
+      - .env
+    ports:
+      - ${AUTH_HTTP_PORT:-8081}:8081
+    networks:
+      app_network:
+        ipv4_address: 171.4.4.13
+        aliases:
+          - yukiko.auth 
+
+
+networks:
+  app_network:
+    name: app_network
+    ipam:
+      config:
+        - subnet: "171.4.4.0/24"
