@@ -12,13 +12,13 @@ import (
 )
 
 type Server struct {
-	logger     *logrus.Logger
+	logger      *logrus.Logger
 	authUseCase interfaces.AuthUseCase
 }
 
 func NewServer(logger *logrus.Logger, orderUseCase interfaces.AuthUseCase) *Server {
 	return &Server{
-		logger: logger,
+		logger:      logger,
 		authUseCase: orderUseCase,
 	}
 }

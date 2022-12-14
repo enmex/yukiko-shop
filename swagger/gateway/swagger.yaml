@@ -6,3 +6,158 @@ info:
 servers:
   - description: Local server
     url: http://localhost:8080/
+  
+paths: 
+  /auth/signUp:
+    post:
+      tags:
+        - User
+      summary: Регистрация пользователя
+      description: Регистрирует пользователя в системе
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignUpRequest"
+      responses:
+        201:
+          $ref: "#/components/responses/AuthResponse"
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /auth/signIn:
+    post:
+      tags:
+        - User
+      summary: Авторизация пользователя
+      description: Авторизирует пользователя в системе
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInRequest"
+      responses:
+        201:
+          $ref: "#/components/responses/AuthResponse"
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
+components:
+  schemas:
+    User:
+      required:
+        - id
+        - email
+        - firstName
+        - lastName
+        - password
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        firstName:
+          type: string
+        lastName: 
+          type: string
+        password:
+          type: string
+
+    Token:
+      required:
+        - token
+        - expiresAt
+      properties:
+        token:
+          type: string
+        expiresAt:
+          type: integer
+          format: int64
+
+    UserToken:
+      required:
+        - access
+        - refresh
+      properties:
+        access:
+          $ref: "#/components/schemas/Token"
+        refresh:
+          $ref: "#/components/schemas/Token"
+
+    SignInRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        
+    SignUpRequest:
+      type: object
+      required:
+        - email
+        - firstName
+        - lastName
+        - password
+      properties:
+        email:
+          type: string
+        firstName:  
+          type: string
+        lastName: 
+          type: string
+        password:
+          type: string
+      
+    AuthResponse:
+      type: object
+      required:
+        - auth
+        - profile
+      properties:
+        auth:
+          $ref: "#/components/schemas/UserToken"
+        profile:
+          $ref: "#/components/schemas/User"
+
+    ErrorResponse:
+      type: object
+      required:
+        - errorCode
+        - message
+      properties:
+        errorCode:
+          type: string
+          enum:
+            - BAD_REQUEST
+            - VALIDATION_FAILED
+            - UNAUTHORIZED
+            - FORBIDDEN
+            - NOT_FOUND
+            - CONFLICT
+            - FOLDING_DEPTH_EXCEEDED
+            - CYCLIC_FOLDING
+            - INTERNAL_SERVER_ERROR
+        message:
+          type: string
+
+  responses:
+    AuthResponse:
+      description: Все хорошо
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/AuthResponse"
+
+    ErrorResponse:
+      description: Что-то не так
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"

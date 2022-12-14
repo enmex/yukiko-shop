@@ -14,7 +14,7 @@ func NewJWTConfig() (*auth.Config, error) {
 	}
 
 	return &auth.Config{
-		Secret: []byte(os.Getenv("HASH_SALT")),
+		Secret:         []byte(os.Getenv("HASH_SALT")),
 		ExpirationTime: expirationTime,
 	}, nil
 }

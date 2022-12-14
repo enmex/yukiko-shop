@@ -7,10 +7,10 @@ import (
 
 func ConvertEntToDomain(userEnt *ent.User) *spec.User {
 	return &spec.User{
-		Id:       userEnt.ID.String(),
-		Email:    userEnt.Email,
+		Id:        userEnt.ID.String(),
+		Email:     userEnt.Email,
 		FirstName: userEnt.FirstName,
-		LastName: userEnt.LastName,
-		Password: userEnt.Password,
+		LastName:  userEnt.LastName,
+		Password:  userEnt.Password,
 	}
 }

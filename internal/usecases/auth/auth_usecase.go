@@ -18,18 +18,18 @@ import (
 var _ interfaces.AuthUseCase = (*AuthUseCase)(nil)
 
 type AuthUseCase struct {
-	logger *logrus.Logger
-	cfg *auth.Config
+	logger   *logrus.Logger
+	cfg      *auth.Config
 	userRepo interfaces.UserRepository
-	jwtAuth *auth.JwtAuthenticate
+	jwtAuth  *auth.JwtAuthenticate
 }
 
 func NewAuthUseCase(logger *logrus.Logger, cfg *auth.Config, userRepo interfaces.UserRepository, jwtAuth *auth.JwtAuthenticate) *AuthUseCase {
 	return &AuthUseCase{
-		logger: logger,
-		cfg: cfg,
+		logger:   logger,
+		cfg:      cfg,
 		userRepo: userRepo,
-		jwtAuth: jwtAuth,
+		jwtAuth:  jwtAuth,
 	}
 }
 
@@ -38,7 +38,7 @@ func (u *AuthUseCase) SignUp(ctx context.Context, request spec.SignUpRequest) (*
 	if err != nil {
 		return nil, err
 	}
-		
+
 	if userEnt != nil {
 		return nil, domain.UserAlreadyExistsErr
 	}
@@ -46,10 +46,10 @@ func (u *AuthUseCase) SignUp(ctx context.Context, request spec.SignUpRequest) (*
 	password := utils.CryptString(request.Password, string(u.cfg.Secret))
 
 	userDomain := domain.User{
-		Email:    request.Email,
+		Email:     request.Email,
 		FirstName: request.FirstName,
-		LastName: request.LastName,
-		Password: password,
+		LastName:  request.LastName,
+		Password:  password,
 	}
 
 	userEnt, err = u.userRepo.CreateUser(ctx, &userDomain)
@@ -77,11 +77,11 @@ func (u *AuthUseCase) SignUp(ctx context.Context, request spec.SignUpRequest) (*
 	return &spec.AuthResponse{
 		Auth: spec.UserToken{
 			Access: spec.Token{
-				Token: jwtToken,
+				Token:     jwtToken,
 				ExpiresAt: expiresAt.UnixNano(),
 			},
 			Refresh: spec.Token{
-				Token: jwtToken,
+				Token:     jwtToken,
 				ExpiresAt: expiresAt.UnixNano(),
 			},
 		},
@@ -122,11 +122,11 @@ func (u *AuthUseCase) SignIn(ctx context.Context, request spec.SignInRequest) (*
 	return &spec.AuthResponse{
 		Auth: spec.UserToken{
 			Access: spec.Token{
-				Token: jwtToken,
+				Token:     jwtToken,
 				ExpiresAt: expiresAt.UnixMilli(),
 			},
 			Refresh: spec.Token{
-				Token: jwtToken,
+				Token:     jwtToken,
 				ExpiresAt: expiresAt.UnixMilli(),
 			},
 		},

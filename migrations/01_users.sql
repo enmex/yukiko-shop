@@ -1,7 +1,9 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE OR UPDATE TABLE roles (
-    "name" VARCHAR NOT NULL CONSTRAINT role_pk PRIMARY KEY
+CREATE TYPE access_type AS ENUM (
+    'ADMIN',
+    'MODERATOR',
+    'CUSTOMER'
 );
 
 CREATE TABLE users (
@@ -10,7 +12,7 @@ CREATE TABLE users (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "role" VARCHAR(15) NOT NULL FOREIGN KEY roles("name")
+    access_type access_type NOT NULL DEFAULT 'CUSTOMER'
 );
 
 CREATE UNIQUE INDEX user_email_idx ON users(email);

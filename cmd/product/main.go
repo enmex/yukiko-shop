@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
+	"strings"
 	"yukiko-shop/config"
-	"yukiko-shop/internal/generated/spec/auth"
+	"yukiko-shop/internal/generated/spec/product"
 	productServer "yukiko-shop/internal/server/product"
 	productUseCase "yukiko-shop/internal/usecases/product"
 	"yukiko-shop/pkg/db"
@@ -73,9 +74,9 @@ func run(logger *logrus.Logger) error {
 	}
 
 	handler := spec.HandlerWithOptions(srv, options)
-	httpServer := http.NewServer(ctx, cfg.HTTP.AuthHTTPPort, handler)
+	httpServer := http.NewServer(ctx, strings.Split(cfg.HTTP.ProductServiceHost, ":")[1], handler)
 
-	logger.Infoln("Auth server has been started")
+	logger.Infoln("Product server has been started")
 	err = http.StartServer(httpServer)
 	if err != nil {
 		return err

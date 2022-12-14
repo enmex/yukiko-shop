@@ -17,14 +17,16 @@ func JSON(w http.ResponseWriter, status int, v interface{}) {
 		return
 	}
 
+	Reply(w, status, buf.Bytes())
+}
+
+func Reply(w http.ResponseWriter, status int, content []byte) {
 	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
 	w.WriteHeader(status)
-	_, _ = w.Write(buf.Bytes())
+	_, _ = w.Write(content)
 }
 
 func EmptyJSON(w http.ResponseWriter, status int) {
 	buf := &bytes.Buffer{}
-	w.Header().Set("Content-Type", "application/json;charset=UTF-8")
-	w.WriteHeader(status)
-	_, _ = w.Write(buf.Bytes())
+	Reply(w, status, buf.Bytes())
 }

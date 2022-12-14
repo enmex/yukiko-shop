@@ -1,7 +1,7 @@
 package auth
 
 import (
-	spec "yukiko-shop/internal/generated/spec/auth"
+	spec "yukiko-shop/internal/generated/spec/product"
 	"yukiko-shop/internal/interfaces"
 	"yukiko-shop/internal/repository/ent"
 

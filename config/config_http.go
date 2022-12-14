@@ -3,11 +3,15 @@ package config
 import "os"
 
 type ConfigHTTP struct {
-	AuthHTTPPort string
+	AuthServiceHost    string
+	ProductServiceHost string
+	GatewayServiceHost string
 }
 
 func NewConfigHTTP() *ConfigHTTP {
 	return &ConfigHTTP{
-		AuthHTTPPort: os.Getenv("AUTH_HTTP_PORT"),
+		AuthServiceHost:    os.Getenv("AUTH_SERVICE_HOST"),
+		ProductServiceHost: os.Getenv("PRODUCT_SERVICE_HOST"),
+		GatewayServiceHost: os.Getenv("GATEWAY_SERVICE_HOST"),
 	}
 }

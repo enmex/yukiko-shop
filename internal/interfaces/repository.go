@@ -12,5 +12,4 @@ type UserRepository interface {
 }
 
 type ProductRepository struct {
-	
 }
