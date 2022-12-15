@@ -11,13 +11,13 @@ import (
 
 type Server struct {
 	logger *logrus.Logger
-	cfg *config.ConfigHTTP
+	cfg    *config.ConfigHTTP
 }
 
 func NewServer(logger *logrus.Logger, cfg *config.ConfigHTTP) *Server {
 	return &Server{
 		logger: logger,
-		cfg: cfg,
+		cfg:    cfg,
 	}
 }
 

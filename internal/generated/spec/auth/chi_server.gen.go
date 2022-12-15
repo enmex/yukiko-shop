@@ -12,6 +12,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Отправить код на почту
+	// (POST /auth/sendVerifyCode)
+	PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request)
 	// Авторизация пользователя
 	// (POST /auth/signIn)
 	PostAuthSignIn(w http.ResponseWriter, r *http.Request)
@@ -28,6 +31,21 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
+
+// PostAuthSendVerifyCode operation middleware
+func (siw *ServerInterfaceWrapper) PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostAuthSendVerifyCode(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
 
 // PostAuthSignIn operation middleware
 func (siw *ServerInterfaceWrapper) PostAuthSignIn(w http.ResponseWriter, r *http.Request) {
@@ -173,6 +191,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/auth/sendVerifyCode", wrapper.PostAuthSendVerifyCode)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/auth/signIn", wrapper.PostAuthSignIn)
 	})
 	r.Group(func(r chi.Router) {
@@ -181,3 +202,4 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 
 	return r
 }
+

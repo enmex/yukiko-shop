@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"strings"
+	"time"
 	"yukiko-shop/config"
 	"yukiko-shop/internal/generated/spec/auth"
 	"yukiko-shop/internal/repository"
@@ -12,7 +14,11 @@ import (
 	"yukiko-shop/pkg/db"
 	"yukiko-shop/pkg/http"
 	"yukiko-shop/pkg/logger"
+	"yukiko-shop/pkg/mailer"
 
+	redisCache "yukiko-shop/pkg/redis-cache"
+
+	"github.com/go-redis/redis/v8"
 	"github.com/sirupsen/logrus"
 )
 
@@ -58,12 +64,27 @@ func run(logger *logrus.Logger) error {
 	//google oauth2
 	//googleAuth := auth.NewGoogleAuth(cfg.Google)
 
+	//mailer
+	mailer := mailer.NewMailer(cfg.Mailer)
+
+	//redis
+	redisClient := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%d", cfg.Redis.Host, cfg.Redis.Port),
+		Password: cfg.Redis.Password,
+		DB:       cfg.Redis.DB,
+	})
+
+	redisCache := redisCache.NewRedisCache[int](redisClient, time.Hour*24)
+
 	//useCase
 	useCase := authUseCase.NewAuthUseCase(
 		logger,
 		cfg.JWT,
+		cfg.Mailer,
 		repo,
 		jwtAuth,
+		mailer,
+		redisCache,
 	)
 
 	// Server

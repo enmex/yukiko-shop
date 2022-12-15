@@ -39,6 +39,11 @@ type ErrorResponse struct {
 // ErrorResponseErrorCode defines model for ErrorResponse.ErrorCode.
 type ErrorResponseErrorCode string
 
+// SendVerifyCodeRequest defines model for SendVerifyCodeRequest.
+type SendVerifyCodeRequest struct {
+	Email string `json:"email"`
+}
+
 // SignInRequest defines model for SignInRequest.
 type SignInRequest struct {
 	Email    string `json:"email"`
@@ -47,6 +52,7 @@ type SignInRequest struct {
 
 // SignUpRequest defines model for SignUpRequest.
 type SignUpRequest struct {
+	Code      int    `json:"code"`
 	Email     string `json:"email"`
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
@@ -74,14 +80,21 @@ type UserToken struct {
 	Refresh Token `json:"refresh"`
 }
 
+// PostAuthSendVerifyCodeJSONBody defines parameters for PostAuthSendVerifyCode.
+type PostAuthSendVerifyCodeJSONBody SendVerifyCodeRequest
+
 // PostAuthSignInJSONBody defines parameters for PostAuthSignIn.
 type PostAuthSignInJSONBody SignInRequest
 
 // PostAuthSignUpJSONBody defines parameters for PostAuthSignUp.
 type PostAuthSignUpJSONBody SignUpRequest
 
+// PostAuthSendVerifyCodeJSONRequestBody defines body for PostAuthSendVerifyCode for application/json ContentType.
+type PostAuthSendVerifyCodeJSONRequestBody PostAuthSendVerifyCodeJSONBody
+
 // PostAuthSignInJSONRequestBody defines body for PostAuthSignIn for application/json ContentType.
 type PostAuthSignInJSONRequestBody PostAuthSignInJSONBody
 
 // PostAuthSignUpJSONRequestBody defines body for PostAuthSignUp for application/json ContentType.
 type PostAuthSignUpJSONRequestBody PostAuthSignUpJSONBody
+

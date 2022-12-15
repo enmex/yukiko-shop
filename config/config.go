@@ -3,12 +3,15 @@ package config
 import (
 	"yukiko-shop/pkg/auth"
 	"yukiko-shop/pkg/db"
+	"yukiko-shop/pkg/mailer"
 )
 
 type Config struct {
-	DB   *db.Config
-	JWT  *auth.Config
-	HTTP *ConfigHTTP
+	DB     *db.Config
+	JWT    *auth.Config
+	HTTP   *ConfigHTTP
+	Mailer *mailer.Config
+	Redis  *ConfigRedis
 }
 
 func NewConfig() (*Config, error) {
@@ -19,8 +22,10 @@ func NewConfig() (*Config, error) {
 	}
 
 	return &Config{
-		DB:   NewDBConfig(),
-		JWT:  jwtConf,
-		HTTP: NewConfigHTTP(),
+		DB:     NewDBConfig(),
+		JWT:    jwtConf,
+		HTTP:   NewConfigHTTP(),
+		Mailer: NewConfigMailer(),
+		Redis:  NewConfigRedis(),
 	}, nil
 }

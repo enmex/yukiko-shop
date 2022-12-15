@@ -36,7 +36,7 @@ func Post(url string, request interface{}) (*Response, error) {
 	}
 
 	jsonBody := string(jsonData)
-	
+
 	return &Response{
 		Code: res.StatusCode,
 		Body: &jsonBody,

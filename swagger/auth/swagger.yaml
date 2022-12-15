@@ -8,6 +8,22 @@ servers:
     url: http://localhost:8081/
   
 paths: 
+  /auth/sendVerifyCode:
+    post:
+      tags:
+        - User
+      summary: Отправить код на почту
+      description: Отправить код верификации
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendVerifyCodeRequest"
+      responses:
+        200:
+          description: успешно отправлен код
+
   /auth/signUp:
     post:
       tags:
@@ -87,6 +103,13 @@ components:
         refresh:
           $ref: "#/components/schemas/Token"
 
+    SendVerifyCodeRequest:
+      required:
+        - email
+      properties:
+        email:
+          type: string
+
     SignInRequest:
       type: object
       required:
@@ -105,6 +128,7 @@ components:
         - firstName
         - lastName
         - password
+        - code
       properties:
         email:
           type: string
@@ -114,6 +138,8 @@ components:
           type: string
         password:
           type: string
+        code: 
+          type: integer
       
     AuthResponse:
       type: object
