@@ -11,8 +11,10 @@ gen_server:
 	go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.9.0 -package spec -generate spec ./swagger/gateway/swagger.yaml > ./internal/generated/spec/gateway/spec.gen.go
 	go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.9.0 -package spec -generate chi-server ./swagger/gateway/swagger.yaml > ./internal/generated/spec/gateway/chi_server.gen.go
 
-
 	go mod tidy
 
 gen_orm:
 	-go run entgo.io/ent/cmd/ent@v0.10.1 generate --target ./internal/repository/ent ./internal/repository/schema 
+
+start:
+	docker-compose up --build

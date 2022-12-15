@@ -155,21 +155,8 @@ components:
     ErrorResponse:
       type: object
       required:
-        - errorCode
         - message
       properties:
-        errorCode:
-          type: string
-          enum:
-            - BAD_REQUEST
-            - VALIDATION_FAILED
-            - UNAUTHORIZED
-            - FORBIDDEN
-            - NOT_FOUND
-            - CONFLICT
-            - FOLDING_DEPTH_EXCEEDED
-            - CYCLIC_FOLDING
-            - INTERNAL_SERVER_ERROR
         message:
           type: string
 

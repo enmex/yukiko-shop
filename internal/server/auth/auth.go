@@ -14,7 +14,6 @@ func (s Server) PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request) {
 	var request spec.SendVerifyCodeRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
-			ErrorCode: spec.ErrorResponseErrorCodeINTERNALSERVERERROR,
 			Message:   err.Error(),
 		})
 		return
@@ -23,13 +22,11 @@ func (s Server) PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request) {
 	if err := s.authUseCase.SendVerifyCode(ctx, request); err != nil {
 		if strings.EqualFold(err.Error(), domain.VerifyCodeExpiredErr.Error()) || strings.EqualFold(err.Error(), domain.VerifyCodeNotMatchErr.Error()) {
 			response.JSON(w, http.StatusBadRequest, spec.ErrorResponse{
-				ErrorCode: spec.ErrorResponseErrorCodeBADREQUEST,
 				Message:   err.Error(),
 			})
 			return
 		}
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
-			ErrorCode: spec.ErrorResponseErrorCodeINTERNALSERVERERROR,
 			Message:   err.Error(),
 		})
 		return
@@ -42,7 +39,6 @@ func (s Server) PostAuthSignIn(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
-			ErrorCode: spec.ErrorResponseErrorCodeINTERNALSERVERERROR,
 			Message:   err.Error(),
 		})
 		return
@@ -52,14 +48,12 @@ func (s Server) PostAuthSignIn(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if strings.EqualFold(err.Error(), domain.UserNotFoundErr.Error()) {
 			response.JSON(w, http.StatusBadRequest, spec.ErrorResponse{
-				ErrorCode: spec.ErrorResponseErrorCodeBADREQUEST,
 				Message:   err.Error(),
 			})
 			return
 		}
 
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
-			ErrorCode: spec.ErrorResponseErrorCodeINTERNALSERVERERROR,
 			Message:   err.Error(),
 		})
 		return
@@ -74,7 +68,6 @@ func (s Server) PostAuthSignUp(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
-			ErrorCode: spec.ErrorResponseErrorCodeINTERNALSERVERERROR,
 			Message:   err.Error(),
 		})
 		return
@@ -84,14 +77,12 @@ func (s Server) PostAuthSignUp(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if strings.EqualFold(err.Error(), domain.UserAlreadyExistsErr.Error()) {
 			response.JSON(w, http.StatusBadRequest, spec.ErrorResponse{
-				ErrorCode: spec.ErrorResponseErrorCodeBADREQUEST,
 				Message:   err.Error(),
 			})
 			return
 		}
 
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
-			ErrorCode: spec.ErrorResponseErrorCodeINTERNALSERVERERROR,
 			Message:   err.Error(),
 		})
 		return
