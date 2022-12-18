@@ -40,6 +40,28 @@ services:
         aliases:
           - yukiko.redis.loc
 
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server --console-address ":9001" /data/
+    environment:
+      MINIO_ROOT_USER: user
+      MINIO_ROOT_PASSWORD: userpass
+    volumes:
+      - minio-storage:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      app_network:
+        ipv4_address: 171.4.4.8
+        aliases:
+          - yukiko.s3.loc
+
   auth:
     container_name: auth
     depends_on:
@@ -61,6 +83,7 @@ services:
     container_name: product
     depends_on:
       - yukiko_db
+      - minio
     build:
       context: .
       dockerfile: ./docker/product.dockerfile
@@ -88,7 +111,6 @@ services:
         ipv4_address: 171.4.4.10
         aliases:
           - yukiko.gateway.loc
-
 
 networks:
   app_network:

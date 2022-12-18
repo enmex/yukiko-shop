@@ -11,6 +11,7 @@ import (
 	"yukiko-shop/pkg/db"
 	"yukiko-shop/pkg/http"
 	"yukiko-shop/pkg/logger"
+	"yukiko-shop/pkg/minio"
 
 	"github.com/sirupsen/logrus"
 )
@@ -45,22 +46,22 @@ func run(logger *logrus.Logger) error {
 	if err != nil {
 		return err
 	}
-
 	defer dbClient.Close()
 
 	// repository
 	repo := repository.NewProductRepository(dbClient, logger)
 
-	//jwt auth
-	//jwtAuth := auth.NewJwtAuthenticate(cfg.JWT)
-
-	//google oauth2
-	//googleAuth := auth.NewGoogleAuth(cfg.Google)
+	//minio
+	minioClient, err := minio.NewClient(ctx, cfg.Minio)
+	if err != nil {
+		return err
+	}
 
 	//useCase
 	useCase := productUseCase.NewProductUseCase(
 		logger,
 		repo,
+		minioClient,
 	)
 
 	// Server

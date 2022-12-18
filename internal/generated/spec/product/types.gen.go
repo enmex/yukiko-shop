@@ -45,6 +45,11 @@ type GetProductResponse struct {
 	Price        float64 `json:"price"`
 }
 
+// GetProductsResponse defines model for GetProductsResponse.
+type GetProductsResponse struct {
+	Products []Product `json:"products"`
+}
+
 // Product defines model for Product.
 type Product struct {
 	CategoryName string  `json:"categoryName"`
@@ -57,6 +62,11 @@ type Product struct {
 
 // ProductID defines model for productID.
 type ProductID string
+
+// GetProductsParams defines parameters for GetProducts.
+type GetProductsParams struct {
+	Limit *int `json:"limit,omitempty"`
+}
 
 // PostProductsJSONBody defines parameters for PostProducts.
 type PostProductsJSONBody CreateProductRequest

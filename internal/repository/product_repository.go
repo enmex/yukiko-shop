@@ -15,6 +15,10 @@ import (
 
 var _ interfaces.ProductRepository = (*ProductRepository)(nil)
 
+var (
+	defaultRowsLimit = 35
+)
+
 type ProductRepository struct {
 	Client *ent.Client
 	log    *logrus.Logger
@@ -45,6 +49,8 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *domai
 		SetName(product.Name).
 		SetDescription(product.Description).
 		SetCategory(categoryEnt).
+		SetPhotoURL(product.PhotoURL).
+		SetPrice(product.Price).
 		Save(ctx)
 
 	if err != nil {
@@ -84,4 +90,22 @@ func (repo *ProductRepository) DeleteProduct(ctx context.Context, productID uuid
 	}
 
 	return err
+}
+
+func (repo *ProductRepository) GetProducts(ctx context.Context, limit *int) ([]*ent.Product, error) {
+	qb := repo.Client.Product.Query()
+
+	if limit != nil {
+		qb = qb.Limit(*limit)
+	} else {
+		qb = qb.Limit(defaultRowsLimit)
+	}
+
+	productsEnt, err := qb.All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return productsEnt, nil
 }

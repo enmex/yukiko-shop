@@ -112,3 +112,19 @@ func (s Server) DeleteProductsProductID(w http.ResponseWriter, r *http.Request, 
 
 	response.EmptyJSON(w, http.StatusNoContent)
 }
+
+func (s Server) GetProducts(w http.ResponseWriter, r *http.Request, params spec.GetProductsParams) {
+	ctx := r.Context()
+	
+	products, err := s.productUseCase.GetProducts(ctx, params.Limit)
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.JSON(w, http.StatusOK, spec.GetProductsResponse{
+		Products: products,
+	})
+}

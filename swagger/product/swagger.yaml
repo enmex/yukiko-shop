@@ -25,6 +25,21 @@ paths:
           $ref: "#/components/responses/CreateProductResponse"
         400:
           $ref: "#/components/responses/ErrorResponse"
+    get:
+      tags: 
+        - Product
+      description: Получить список товаров
+      summary: Получить список товаров
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        200:
+          $ref: "#/components/responses/GetProductsResponse"
+        400:
+          $ref: "#/components/responses/ErrorResponse"
 
   /products/{productID}:
     get:
@@ -170,6 +185,16 @@ components:
         categoryName:
           type: string
 
+    GetProductsResponse:
+      type: object
+      required:
+        - products
+      properties:
+        products:
+          type: array
+          items: 
+            $ref: "#/components/schemas/Product"
+
     ErrorResponse:
       type: object
       required:
@@ -192,6 +217,13 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/GetProductResponse"
+
+    GetProductsResponse:
+      description: Список товаров в каталоге
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GetProductsResponse"
 
     ErrorResponse:
       description: Что-то не так

@@ -112,3 +112,22 @@ func (s Server) GetProductsProductID(w http.ResponseWriter, r *http.Request, pro
 
 	response.Reply(w, res.Code, []byte(*res.Body))
 }
+
+func (s Server) GetProducts(w http.ResponseWriter, r *http.Request, params spec.GetProductsParams) {
+	var url string
+	if params.Limit != nil {
+		url = fmt.Sprintf("http://%s/products?limit=%d", s.cfg.ProductServiceHost, *params.Limit)
+	} else {
+		url = fmt.Sprintf("http://%s/products", s.cfg.ProductServiceHost)
+	}
+
+	res, err := httpRequest.Get(url)
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}

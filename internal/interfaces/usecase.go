@@ -18,5 +18,6 @@ type AuthUseCase interface {
 type ProductUseCase interface {
 	CreateProduct(ctx context.Context, product *domain.Product) (*specProduct.Product, error)
 	GetProduct(ctx context.Context, productID uuid.UUID) (*specProduct.Product, error)
+	GetProducts(ctx context.Context, limit *int) ([]specProduct.Product, error)
 	DeleteProduct(ctx context.Context, productID uuid.UUID) error
 }

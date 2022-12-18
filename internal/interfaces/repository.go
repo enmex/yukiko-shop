@@ -16,5 +16,6 @@ type UserRepository interface {
 type ProductRepository interface {
 	CreateProduct(ctx context.Context, product *domain.Product) (*ent.Product, error)
 	GetProduct(ctx context.Context, productID uuid.UUID) (*ent.Product, error)
+	GetProducts(ctx context.Context, limit *int) ([]*ent.Product, error)
 	DeleteProduct(ctx context.Context, productID uuid.UUID) error
 }
