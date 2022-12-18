@@ -2,7 +2,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TYPE access_type AS ENUM (
     'ADMIN',
-    'MODERATOR',
+    'MANAGER',
     'CUSTOMER'
 );
 

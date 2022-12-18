@@ -6,3 +6,205 @@ info:
 servers:
   - description: Local server
     url: http://localhost:8082/
+
+paths:
+  /products:
+    post:
+      tags: 
+        - Product
+      description: Добавление товара
+      summary: Добавление товара
+      requestBody: 
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+      responses:
+        201:
+          $ref: "#/components/responses/CreateProductResponse"
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /products/{productID}:
+    get:
+      tags:
+        - Product
+      description: Получение информации о товаре
+      summary: Получение информации о товаре
+      parameters:
+        - $ref: "#/components/parameters/productID"
+      responses:
+        200:
+          $ref: "#/components/responses/GetProductResponse"
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags:
+        - Product
+      description: Удаление товара
+      summary: Удаление товара 
+      parameters:
+        - $ref: "#/components/parameters/productID"
+      responses:
+        204:
+          description: Успешно
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
+components:
+  schemas:
+    Category:
+      type: object
+      required: 
+        - childrenCategories
+        - name
+      properties:
+        parentCategory:
+            $ref: "#/components/schemas/Category"
+        name:
+          type: string
+          example: Аниме фигурки
+        childrenCategories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product" 
+
+    Product:
+      type: object
+      required: 
+        - id
+        - name
+        - photoUrl
+        - description
+        - price
+        - categoryName
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        photoUrl:
+          type: string
+        price:
+          type: number
+          format: double
+        categoryName:
+          type: string
+
+    CreateProductRequest:
+      type: object
+      required: 
+        - name
+        - description
+        - path
+        - price
+        - categoryName
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        path:
+          type: string
+        price:
+          type: number
+          format: double
+        categoryName:
+          type: string
+
+    CreateProductResponse:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - photoUrl
+        - price
+        - categoryName
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        photoUrl:
+          type: string
+        price:  
+          type: number
+          format: double
+        categoryName:
+          type: string
+
+    GetProductResponse:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - photoUrl
+        - price
+        - categoryName
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        photoUrl:
+          type: string
+        price:  
+          type: number
+          format: double
+        categoryName:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+
+  responses:
+    CreateProductResponse:
+      description: Ответ сервера на создание товара
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateProductResponse"
+    
+    GetProductResponse:
+      description: Успешное получение информации о товаре
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GetProductResponse"
+
+    ErrorResponse:
+      description: Что-то не так
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  parameters:
+    productID:
+      name: productID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid

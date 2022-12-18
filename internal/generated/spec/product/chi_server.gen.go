@@ -7,11 +7,21 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/go-chi/chi/v5"
 )
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Добавление товара
+	// (POST /products)
+	PostProducts(w http.ResponseWriter, r *http.Request)
+	// Удаление товара
+	// (DELETE /products/{productID})
+	DeleteProductsProductID(w http.ResponseWriter, r *http.Request, productID ProductID)
+	// Получение информации о товаре
+	// (GET /products/{productID})
+	GetProductsProductID(w http.ResponseWriter, r *http.Request, productID ProductID)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -22,6 +32,73 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
+
+// PostProducts operation middleware
+func (siw *ServerInterfaceWrapper) PostProducts(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostProducts(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// DeleteProductsProductID operation middleware
+func (siw *ServerInterfaceWrapper) DeleteProductsProductID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "productID" -------------
+	var productID ProductID
+
+	err = runtime.BindStyledParameter("simple", false, "productID", chi.URLParam(r, "productID"), &productID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "productID", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteProductsProductID(w, r, productID)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetProductsProductID operation middleware
+func (siw *ServerInterfaceWrapper) GetProductsProductID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "productID" -------------
+	var productID ProductID
+
+	err = runtime.BindStyledParameter("simple", false, "productID", chi.URLParam(r, "productID"), &productID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "productID", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetProductsProductID(w, r, productID)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
 
 type UnescapedCookieParamError struct {
 	ParamName string
@@ -130,6 +207,21 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 	}
+	wrapper := ServerInterfaceWrapper{
+		Handler:            si,
+		HandlerMiddlewares: options.Middlewares,
+		ErrorHandlerFunc:   options.ErrorHandlerFunc,
+	}
+
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/products", wrapper.PostProducts)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/products/{productID}", wrapper.DeleteProductsProductID)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/products/{productID}", wrapper.GetProductsProductID)
+	})
 
 	return r
 }

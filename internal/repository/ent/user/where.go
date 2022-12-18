@@ -453,6 +453,54 @@ func LastNameContainsFold(v string) predicate.User {
 	})
 }
 
+// AccessTypeEQ applies the EQ predicate on the "access_type" field.
+func AccessTypeEQ(v AccessType) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldAccessType), v))
+	})
+}
+
+// AccessTypeNEQ applies the NEQ predicate on the "access_type" field.
+func AccessTypeNEQ(v AccessType) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldAccessType), v))
+	})
+}
+
+// AccessTypeIn applies the In predicate on the "access_type" field.
+func AccessTypeIn(vs ...AccessType) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldAccessType), v...))
+	})
+}
+
+// AccessTypeNotIn applies the NotIn predicate on the "access_type" field.
+func AccessTypeNotIn(vs ...AccessType) predicate.User {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.User(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldAccessType), v...))
+	})
+}
+
 // PasswordEQ applies the EQ predicate on the "password" field.
 func PasswordEQ(v string) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

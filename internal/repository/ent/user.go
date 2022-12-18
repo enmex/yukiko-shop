@@ -22,6 +22,8 @@ type User struct {
 	FirstName string `json:"first_name,omitempty"`
 	// LastName holds the value of the "last_name" field.
 	LastName string `json:"last_name,omitempty"`
+	// AccessType holds the value of the "access_type" field.
+	AccessType user.AccessType `json:"access_type,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `json:"password,omitempty"`
 }
@@ -31,7 +33,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldEmail, user.FieldFirstName, user.FieldLastName, user.FieldPassword:
+		case user.FieldEmail, user.FieldFirstName, user.FieldLastName, user.FieldAccessType, user.FieldPassword:
 			values[i] = new(sql.NullString)
 		case user.FieldID:
 			values[i] = new(uuid.UUID)
@@ -74,6 +76,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.LastName = value.String
 			}
+		case user.FieldAccessType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field access_type", values[i])
+			} else if value.Valid {
+				u.AccessType = user.AccessType(value.String)
+			}
 		case user.FieldPassword:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field password", values[i])
@@ -114,6 +122,8 @@ func (u *User) String() string {
 	builder.WriteString(u.FirstName)
 	builder.WriteString(", last_name=")
 	builder.WriteString(u.LastName)
+	builder.WriteString(", access_type=")
+	builder.WriteString(fmt.Sprintf("%v", u.AccessType))
 	builder.WriteString(", password=")
 	builder.WriteString(u.Password)
 	builder.WriteByte(')')

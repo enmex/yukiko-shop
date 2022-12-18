@@ -5,6 +5,7 @@ import (
 	"strings"
 	"yukiko-shop/config"
 	"yukiko-shop/internal/generated/spec/product"
+	"yukiko-shop/internal/repository"
 	productServer "yukiko-shop/internal/server/product"
 	productUseCase "yukiko-shop/internal/usecases/product"
 	"yukiko-shop/pkg/db"
@@ -48,7 +49,7 @@ func run(logger *logrus.Logger) error {
 	defer dbClient.Close()
 
 	// repository
-	//repo := repository.NewUserRepository(dbClient, logger)
+	repo := repository.NewProductRepository(dbClient, logger)
 
 	//jwt auth
 	//jwtAuth := auth.NewJwtAuthenticate(cfg.JWT)
@@ -59,6 +60,7 @@ func run(logger *logrus.Logger) error {
 	//useCase
 	useCase := productUseCase.NewProductUseCase(
 		logger,
+		repo,
 	)
 
 	// Server

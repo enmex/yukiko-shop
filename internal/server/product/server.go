@@ -1,4 +1,4 @@
-package auth
+package product
 
 import (
 	spec "yukiko-shop/internal/generated/spec/product"
@@ -12,14 +12,14 @@ import (
 )
 
 type Server struct {
-	logger       *logrus.Logger
-	orderUseCase interfaces.ProductUseCase
+	logger         *logrus.Logger
+	productUseCase interfaces.ProductUseCase
 }
 
 func NewServer(logger *logrus.Logger, orderUseCase interfaces.ProductUseCase) *Server {
 	return &Server{
-		logger:       logger,
-		orderUseCase: orderUseCase,
+		logger:         logger,
+		productUseCase: orderUseCase,
 	}
 }
 

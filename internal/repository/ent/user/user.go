@@ -3,6 +3,8 @@
 package user
 
 import (
+	"fmt"
+
 	"github.com/google/uuid"
 )
 
@@ -17,6 +19,8 @@ const (
 	FieldFirstName = "first_name"
 	// FieldLastName holds the string denoting the last_name field in the database.
 	FieldLastName = "last_name"
+	// FieldAccessType holds the string denoting the access_type field in the database.
+	FieldAccessType = "access_type"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
 	// Table holds the table name of the user in the database.
@@ -29,6 +33,7 @@ var Columns = []string{
 	FieldEmail,
 	FieldFirstName,
 	FieldLastName,
+	FieldAccessType,
 	FieldPassword,
 }
 
@@ -46,3 +51,30 @@ var (
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )
+
+// AccessType defines the type for the "access_type" enum field.
+type AccessType string
+
+// AccessTypeCUSTOMER is the default value of the AccessType enum.
+const DefaultAccessType = AccessTypeCUSTOMER
+
+// AccessType values.
+const (
+	AccessTypeADMIN    AccessType = "ADMIN"
+	AccessTypeMANAGER  AccessType = "MANAGER"
+	AccessTypeCUSTOMER AccessType = "CUSTOMER"
+)
+
+func (at AccessType) String() string {
+	return string(at)
+}
+
+// AccessTypeValidator is a validator for the "access_type" field enum values. It is called by the builders before save.
+func AccessTypeValidator(at AccessType) error {
+	switch at {
+	case AccessTypeADMIN, AccessTypeMANAGER, AccessTypeCUSTOMER:
+		return nil
+	default:
+		return fmt.Errorf("user: invalid enum value for access_type field: %q", at)
+	}
+}

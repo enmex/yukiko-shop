@@ -18,6 +18,11 @@ func (User) Fields() []ent.Field {
 		field.String("email").Unique(),
 		field.String("first_name"),
 		field.String("last_name"),
+		field.Enum("access_type").Values(
+			"ADMIN",
+			"MANAGER",
+			"CUSTOMER",
+		).Default("CUSTOMER"),
 		field.String("password"),
 	}
 }

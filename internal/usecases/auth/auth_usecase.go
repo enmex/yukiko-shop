@@ -13,9 +13,10 @@ import (
 	"yukiko-shop/pkg/auth"
 	"yukiko-shop/pkg/mailer"
 
+	redisCache "yukiko-shop/pkg/redis-cache"
+
 	"github.com/golang-jwt/jwt"
 	"github.com/sirupsen/logrus"
-	redisCache "yukiko-shop/pkg/redis-cache"
 )
 
 var _ interfaces.AuthUseCase = (*AuthUseCase)(nil)
@@ -64,8 +65,8 @@ func (u *AuthUseCase) SendVerifyCode(ctx context.Context, request spec.SendVerif
 	)
 }
 
-func (u *AuthUseCase) SignUp(ctx context.Context, request spec.SignUpRequest) (*spec.AuthResponse, error) {
-	userEnt, err := u.userRepo.GetUserByEmail(ctx, request.Email)
+func (u *AuthUseCase) SignUp(ctx context.Context, user *domain.User, verifyCode int) (*spec.AuthResponse, error) {
+	userEnt, err := u.userRepo.GetUserByEmail(ctx, user.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -74,25 +75,22 @@ func (u *AuthUseCase) SignUp(ctx context.Context, request spec.SignUpRequest) (*
 		return nil, domain.UserAlreadyExistsErr
 	}
 
-	code, err := u.redisCache.Get(ctx, request.Email)
+	code, err := u.redisCache.Get(ctx, user.Email)
 	if err != nil {
 		return nil, domain.VerifyCodeExpiredErr
 	}
 
-	if *code != request.Code {
+	if *code != verifyCode {
 		return nil, domain.VerifyCodeNotMatchErr
 	}
 
-	password := utils.CryptString(request.Password, string(u.authCfg.Secret))
-
-	userDomain := domain.User{
-		Email:     request.Email,
-		FirstName: request.FirstName,
-		LastName:  request.LastName,
-		Password:  password,
+	if err := u.redisCache.Delete(ctx, user.Email); err != nil {
+		return nil, err
 	}
 
-	userEnt, err = u.userRepo.CreateUser(ctx, &userDomain)
+	user.Password = utils.CryptString(user.Password, string(u.authCfg.Secret))
+
+	userEnt, err = u.userRepo.CreateUser(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -101,7 +99,8 @@ func (u *AuthUseCase) SignUp(ctx context.Context, request spec.SignUpRequest) (*
 	expiresAt := time.Now().Add(u.authCfg.ExpirationTime)
 
 	claims := auth.AccessClaims{
-		UserID: userEnt.ID,
+		UserID:     userEnt.ID,
+		AccessType: string(userEnt.AccessType),
 		StandardClaims: jwt.StandardClaims{
 			IssuedAt:  issuedAt.Unix(),
 			ExpiresAt: expiresAt.Unix(),
@@ -118,19 +117,19 @@ func (u *AuthUseCase) SignUp(ctx context.Context, request spec.SignUpRequest) (*
 		Auth: spec.UserToken{
 			Access: spec.Token{
 				Token:     jwtToken,
-				ExpiresAt: expiresAt.UnixNano(),
+				ExpiresAt: expiresAt.UnixMilli(),
 			},
 			Refresh: spec.Token{
 				Token:     jwtToken,
-				ExpiresAt: expiresAt.UnixNano(),
+				ExpiresAt: expiresAt.UnixMilli(),
 			},
 		},
-		Profile: *adapter.ConvertEntToDomain(userEnt),
+		Profile: *adapter.PresentUser(userEnt),
 	}, nil
 }
 
-func (u *AuthUseCase) SignIn(ctx context.Context, request spec.SignInRequest) (*spec.AuthResponse, error) {
-	userEnt, err := u.userRepo.GetUserByEmail(ctx, request.Email)
+func (u *AuthUseCase) SignIn(ctx context.Context, user *domain.User) (*spec.AuthResponse, error) {
+	userEnt, err := u.userRepo.GetUserByEmail(ctx, user.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +137,7 @@ func (u *AuthUseCase) SignIn(ctx context.Context, request spec.SignInRequest) (*
 		return nil, domain.UserNotFoundErr
 	}
 
-	if !strings.EqualFold(utils.CryptString(request.Password, string(u.authCfg.Secret)), userEnt.Password) {
+	if !strings.EqualFold(utils.CryptString(user.Password, string(u.authCfg.Secret)), userEnt.Password) {
 		return nil, domain.WrongCredentialsErr
 	}
 
@@ -146,7 +145,8 @@ func (u *AuthUseCase) SignIn(ctx context.Context, request spec.SignInRequest) (*
 	expiresAt := time.Now().Add(u.authCfg.ExpirationTime)
 
 	claims := auth.AccessClaims{
-		UserID: userEnt.ID,
+		UserID:     userEnt.ID,
+		AccessType: string(userEnt.AccessType),
 		StandardClaims: jwt.StandardClaims{
 			IssuedAt:  issuedAt.Unix(),
 			ExpiresAt: expiresAt.Unix(),
@@ -170,6 +170,6 @@ func (u *AuthUseCase) SignIn(ctx context.Context, request spec.SignInRequest) (*
 				ExpiresAt: expiresAt.UnixMilli(),
 			},
 		},
-		Profile: *adapter.ConvertEntToDomain(userEnt),
+		Profile: *adapter.PresentUser(userEnt),
 	}, nil
 }

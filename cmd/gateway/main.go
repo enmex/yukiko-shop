@@ -6,6 +6,7 @@ import (
 	"yukiko-shop/config"
 	"yukiko-shop/internal/generated/spec/gateway"
 	gatewayServer "yukiko-shop/internal/server/gateway"
+	"yukiko-shop/pkg/auth"
 	"yukiko-shop/pkg/http"
 	"yukiko-shop/pkg/logger"
 
@@ -36,7 +37,18 @@ func run(logger *logrus.Logger) error {
 		cfg.HTTP,
 	)
 
-	options, err := gatewayServer.NewServerOptions()
+	//jwt auth
+	jwtAuth := auth.NewJwtAuthenticate(cfg.JWT)
+
+	api, err := gatewayServer.NewOpenAPI()
+
+	if err != nil {
+		return err
+	}
+
+	authenticator := auth.NewAuthenticate(api)
+
+	options, err := gatewayServer.NewServerOptions(authenticator, jwtAuth)
 	if err != nil {
 		return err
 	}
@@ -44,7 +56,7 @@ func run(logger *logrus.Logger) error {
 	handler := spec.HandlerWithOptions(srv, options)
 	httpServer := http.NewServer(ctx, strings.Split(cfg.HTTP.GatewayServiceHost, ":")[1], handler)
 
-	logger.Infoln("API gateway is open for client requests")
+	logger.Infoln("API gateway has been opened for client requests")
 	err = http.StartServer(httpServer)
 	if err != nil {
 		return err

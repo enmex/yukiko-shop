@@ -45,6 +45,20 @@ func (uu *UserUpdate) SetLastName(s string) *UserUpdate {
 	return uu
 }
 
+// SetAccessType sets the "access_type" field.
+func (uu *UserUpdate) SetAccessType(ut user.AccessType) *UserUpdate {
+	uu.mutation.SetAccessType(ut)
+	return uu
+}
+
+// SetNillableAccessType sets the "access_type" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableAccessType(ut *user.AccessType) *UserUpdate {
+	if ut != nil {
+		uu.SetAccessType(*ut)
+	}
+	return uu
+}
+
 // SetPassword sets the "password" field.
 func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
 	uu.mutation.SetPassword(s)
@@ -63,12 +77,18 @@ func (uu *UserUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(uu.hooks) == 0 {
+		if err = uu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = uu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*UserMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = uu.check(); err != nil {
+				return 0, err
 			}
 			uu.mutation = mutation
 			affected, err = uu.sqlSave(ctx)
@@ -110,6 +130,16 @@ func (uu *UserUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (uu *UserUpdate) check() error {
+	if v, ok := uu.mutation.AccessType(); ok {
+		if err := user.AccessTypeValidator(v); err != nil {
+			return &ValidationError{Name: "access_type", err: fmt.Errorf(`ent: validator failed for field "User.access_type": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -147,6 +177,13 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: user.FieldLastName,
+		})
+	}
+	if value, ok := uu.mutation.AccessType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldAccessType,
 		})
 	}
 	if value, ok := uu.mutation.Password(); ok {
@@ -193,6 +230,20 @@ func (uuo *UserUpdateOne) SetLastName(s string) *UserUpdateOne {
 	return uuo
 }
 
+// SetAccessType sets the "access_type" field.
+func (uuo *UserUpdateOne) SetAccessType(ut user.AccessType) *UserUpdateOne {
+	uuo.mutation.SetAccessType(ut)
+	return uuo
+}
+
+// SetNillableAccessType sets the "access_type" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableAccessType(ut *user.AccessType) *UserUpdateOne {
+	if ut != nil {
+		uuo.SetAccessType(*ut)
+	}
+	return uuo
+}
+
 // SetPassword sets the "password" field.
 func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
 	uuo.mutation.SetPassword(s)
@@ -218,12 +269,18 @@ func (uuo *UserUpdateOne) Save(ctx context.Context) (*User, error) {
 		node *User
 	)
 	if len(uuo.hooks) == 0 {
+		if err = uuo.check(); err != nil {
+			return nil, err
+		}
 		node, err = uuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*UserMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = uuo.check(); err != nil {
+				return nil, err
 			}
 			uuo.mutation = mutation
 			node, err = uuo.sqlSave(ctx)
@@ -263,6 +320,16 @@ func (uuo *UserUpdateOne) ExecX(ctx context.Context) {
 	if err := uuo.Exec(ctx); err != nil {
 		panic(err)
 	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (uuo *UserUpdateOne) check() error {
+	if v, ok := uuo.mutation.AccessType(); ok {
+		if err := user.AccessTypeValidator(v); err != nil {
+			return &ValidationError{Name: "access_type", err: fmt.Errorf(`ent: validator failed for field "User.access_type": %w`, err)}
+		}
+	}
+	return nil
 }
 
 func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) {
@@ -319,6 +386,13 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeString,
 			Value:  value,
 			Column: user.FieldLastName,
+		})
+	}
+	if value, ok := uuo.mutation.AccessType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldAccessType,
 		})
 	}
 	if value, ok := uuo.mutation.Password(); ok {

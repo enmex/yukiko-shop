@@ -38,6 +38,20 @@ func (uc *UserCreate) SetLastName(s string) *UserCreate {
 	return uc
 }
 
+// SetAccessType sets the "access_type" field.
+func (uc *UserCreate) SetAccessType(ut user.AccessType) *UserCreate {
+	uc.mutation.SetAccessType(ut)
+	return uc
+}
+
+// SetNillableAccessType sets the "access_type" field if the given value is not nil.
+func (uc *UserCreate) SetNillableAccessType(ut *user.AccessType) *UserCreate {
+	if ut != nil {
+		uc.SetAccessType(*ut)
+	}
+	return uc
+}
+
 // SetPassword sets the "password" field.
 func (uc *UserCreate) SetPassword(s string) *UserCreate {
 	uc.mutation.SetPassword(s)
@@ -129,6 +143,10 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UserCreate) defaults() {
+	if _, ok := uc.mutation.AccessType(); !ok {
+		v := user.DefaultAccessType
+		uc.mutation.SetAccessType(v)
+	}
 	if _, ok := uc.mutation.ID(); !ok {
 		v := user.DefaultID()
 		uc.mutation.SetID(v)
@@ -145,6 +163,14 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.LastName(); !ok {
 		return &ValidationError{Name: "last_name", err: errors.New(`ent: missing required field "User.last_name"`)}
+	}
+	if _, ok := uc.mutation.AccessType(); !ok {
+		return &ValidationError{Name: "access_type", err: errors.New(`ent: missing required field "User.access_type"`)}
+	}
+	if v, ok := uc.mutation.AccessType(); ok {
+		if err := user.AccessTypeValidator(v); err != nil {
+			return &ValidationError{Name: "access_type", err: fmt.Errorf(`ent: validator failed for field "User.access_type": %w`, err)}
+		}
 	}
 	if _, ok := uc.mutation.Password(); !ok {
 		return &ValidationError{Name: "password", err: errors.New(`ent: missing required field "User.password"`)}
@@ -208,6 +234,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldLastName,
 		})
 		_node.LastName = value
+	}
+	if value, ok := uc.mutation.AccessType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeEnum,
+			Value:  value,
+			Column: user.FieldAccessType,
+		})
+		_node.AccessType = value
 	}
 	if value, ok := uc.mutation.Password(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

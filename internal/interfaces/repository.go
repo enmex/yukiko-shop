@@ -4,6 +4,8 @@ import (
 	"context"
 	"yukiko-shop/internal/domain"
 	"yukiko-shop/internal/repository/ent"
+
+	"github.com/google/uuid"
 )
 
 type UserRepository interface {
@@ -11,5 +13,8 @@ type UserRepository interface {
 	GetUserByEmail(ctx context.Context, email string) (*ent.User, error)
 }
 
-type ProductRepository struct {
+type ProductRepository interface {
+	CreateProduct(ctx context.Context, product *domain.Product) (*ent.Product, error)
+	GetProduct(ctx context.Context, productID uuid.UUID) (*ent.Product, error)
+	DeleteProduct(ctx context.Context, productID uuid.UUID) error
 }
