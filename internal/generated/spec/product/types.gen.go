@@ -6,9 +6,16 @@ package spec
 // Category defines model for Category.
 type Category struct {
 	ChildrenCategories []Category `json:"childrenCategories"`
+	Id                 string     `json:"id"`
 	Name               string     `json:"name"`
 	ParentCategory     *Category  `json:"parentCategory,omitempty"`
 	Products           *[]Product `json:"products,omitempty"`
+}
+
+// CreateCategoryRequest defines model for CreateCategoryRequest.
+type CreateCategoryRequest struct {
+	Name           string  `json:"name"`
+	ParentCategory *string `json:"parentCategory,omitempty"`
 }
 
 // CreateProductRequest defines model for CreateProductRequest.
@@ -63,6 +70,9 @@ type Product struct {
 // ProductID defines model for productID.
 type ProductID string
 
+// PostCategoriesJSONBody defines parameters for PostCategories.
+type PostCategoriesJSONBody CreateCategoryRequest
+
 // GetProductsParams defines parameters for GetProducts.
 type GetProductsParams struct {
 	Limit *int `json:"limit,omitempty"`
@@ -71,6 +81,8 @@ type GetProductsParams struct {
 // PostProductsJSONBody defines parameters for PostProducts.
 type PostProductsJSONBody CreateProductRequest
 
+// PostCategoriesJSONRequestBody defines body for PostCategories for application/json ContentType.
+type PostCategoriesJSONRequestBody PostCategoriesJSONBody
+
 // PostProductsJSONRequestBody defines body for PostProducts for application/json ContentType.
 type PostProductsJSONRequestBody PostProductsJSONBody
-

@@ -18,8 +18,8 @@ type Category struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
-	// CategoryID holds the value of the "category_id" field.
-	CategoryID uuid.UUID `json:"category_id,omitempty"`
+	// ParentCategory holds the value of the "parent_category" field.
+	ParentCategory uuid.UUID `json:"parent_category,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CategoryQuery when eager-loading is set.
 	Edges CategoryEdges `json:"edges"`
@@ -27,10 +27,10 @@ type Category struct {
 
 // CategoryEdges holds the relations/edges for other nodes in the graph.
 type CategoryEdges struct {
-	// ParentCategory holds the value of the parentCategory edge.
-	ParentCategory *Category `json:"parentCategory,omitempty"`
-	// ChildrenCategories holds the value of the childrenCategories edge.
-	ChildrenCategories []*Category `json:"childrenCategories,omitempty"`
+	// Parent holds the value of the parent edge.
+	Parent *Category `json:"parent,omitempty"`
+	// Children holds the value of the children edge.
+	Children []*Category `json:"children,omitempty"`
 	// Products holds the value of the products edge.
 	Products []*Product `json:"products,omitempty"`
 	// loadedTypes holds the information for reporting if a
@@ -38,27 +38,27 @@ type CategoryEdges struct {
 	loadedTypes [3]bool
 }
 
-// ParentCategoryOrErr returns the ParentCategory value or an error if the edge
+// ParentOrErr returns the Parent value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e CategoryEdges) ParentCategoryOrErr() (*Category, error) {
+func (e CategoryEdges) ParentOrErr() (*Category, error) {
 	if e.loadedTypes[0] {
-		if e.ParentCategory == nil {
-			// The edge parentCategory was loaded in eager-loading,
+		if e.Parent == nil {
+			// The edge parent was loaded in eager-loading,
 			// but was not found.
 			return nil, &NotFoundError{label: category.Label}
 		}
-		return e.ParentCategory, nil
+		return e.Parent, nil
 	}
-	return nil, &NotLoadedError{edge: "parentCategory"}
+	return nil, &NotLoadedError{edge: "parent"}
 }
 
-// ChildrenCategoriesOrErr returns the ChildrenCategories value or an error if the edge
+// ChildrenOrErr returns the Children value or an error if the edge
 // was not loaded in eager-loading.
-func (e CategoryEdges) ChildrenCategoriesOrErr() ([]*Category, error) {
+func (e CategoryEdges) ChildrenOrErr() ([]*Category, error) {
 	if e.loadedTypes[1] {
-		return e.ChildrenCategories, nil
+		return e.Children, nil
 	}
-	return nil, &NotLoadedError{edge: "childrenCategories"}
+	return nil, &NotLoadedError{edge: "children"}
 }
 
 // ProductsOrErr returns the Products value or an error if the edge
@@ -77,7 +77,7 @@ func (*Category) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case category.FieldName:
 			values[i] = new(sql.NullString)
-		case category.FieldID, category.FieldCategoryID:
+		case category.FieldID, category.FieldParentCategory:
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Category", columns[i])
@@ -106,25 +106,25 @@ func (c *Category) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.Name = value.String
 			}
-		case category.FieldCategoryID:
+		case category.FieldParentCategory:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field category_id", values[i])
+				return fmt.Errorf("unexpected type %T for field parent_category", values[i])
 			} else if value != nil {
-				c.CategoryID = *value
+				c.ParentCategory = *value
 			}
 		}
 	}
 	return nil
 }
 
-// QueryParentCategory queries the "parentCategory" edge of the Category entity.
-func (c *Category) QueryParentCategory() *CategoryQuery {
-	return (&CategoryClient{config: c.config}).QueryParentCategory(c)
+// QueryParent queries the "parent" edge of the Category entity.
+func (c *Category) QueryParent() *CategoryQuery {
+	return (&CategoryClient{config: c.config}).QueryParent(c)
 }
 
-// QueryChildrenCategories queries the "childrenCategories" edge of the Category entity.
-func (c *Category) QueryChildrenCategories() *CategoryQuery {
-	return (&CategoryClient{config: c.config}).QueryChildrenCategories(c)
+// QueryChildren queries the "children" edge of the Category entity.
+func (c *Category) QueryChildren() *CategoryQuery {
+	return (&CategoryClient{config: c.config}).QueryChildren(c)
 }
 
 // QueryProducts queries the "products" edge of the Category entity.
@@ -157,8 +157,8 @@ func (c *Category) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(c.Name)
-	builder.WriteString(", category_id=")
-	builder.WriteString(fmt.Sprintf("%v", c.CategoryID))
+	builder.WriteString(", parent_category=")
+	builder.WriteString(fmt.Sprintf("%v", c.ParentCategory))
 	builder.WriteByte(')')
 	return builder.String()
 }

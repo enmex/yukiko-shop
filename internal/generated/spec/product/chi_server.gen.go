@@ -13,6 +13,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Добавить новую категорию
+	// (POST /categories)
+	PostCategories(w http.ResponseWriter, r *http.Request)
 	// Получить список товаров
 	// (GET /products)
 	GetProducts(w http.ResponseWriter, r *http.Request, params GetProductsParams)
@@ -35,6 +38,21 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
+
+// PostCategories operation middleware
+func (siw *ServerInterfaceWrapper) PostCategories(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostCategories(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
 
 // GetProducts operation middleware
 func (siw *ServerInterfaceWrapper) GetProducts(w http.ResponseWriter, r *http.Request) {
@@ -248,6 +266,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/categories", wrapper.PostCategories)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/products", wrapper.GetProducts)
 	})
 	r.Group(func(r chi.Router) {
@@ -262,4 +283,3 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 
 	return r
 }
-

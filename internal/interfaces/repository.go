@@ -19,3 +19,7 @@ type ProductRepository interface {
 	GetProducts(ctx context.Context, limit *int) ([]*ent.Product, error)
 	DeleteProduct(ctx context.Context, productID uuid.UUID) error
 }
+
+type CategoryRepository interface {
+	CreateCategory(ctx context.Context, category *domain.Category) (*ent.Category, error)
+}

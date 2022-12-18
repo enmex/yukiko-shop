@@ -27,16 +27,16 @@ func (cc *CategoryCreate) SetName(s string) *CategoryCreate {
 	return cc
 }
 
-// SetCategoryID sets the "category_id" field.
-func (cc *CategoryCreate) SetCategoryID(u uuid.UUID) *CategoryCreate {
-	cc.mutation.SetCategoryID(u)
+// SetParentCategory sets the "parent_category" field.
+func (cc *CategoryCreate) SetParentCategory(u uuid.UUID) *CategoryCreate {
+	cc.mutation.SetParentCategory(u)
 	return cc
 }
 
-// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (cc *CategoryCreate) SetNillableCategoryID(u *uuid.UUID) *CategoryCreate {
+// SetNillableParentCategory sets the "parent_category" field if the given value is not nil.
+func (cc *CategoryCreate) SetNillableParentCategory(u *uuid.UUID) *CategoryCreate {
 	if u != nil {
-		cc.SetCategoryID(*u)
+		cc.SetParentCategory(*u)
 	}
 	return cc
 }
@@ -55,38 +55,38 @@ func (cc *CategoryCreate) SetNillableID(u *uuid.UUID) *CategoryCreate {
 	return cc
 }
 
-// SetParentCategoryID sets the "parentCategory" edge to the Category entity by ID.
-func (cc *CategoryCreate) SetParentCategoryID(id uuid.UUID) *CategoryCreate {
-	cc.mutation.SetParentCategoryID(id)
+// SetParentID sets the "parent" edge to the Category entity by ID.
+func (cc *CategoryCreate) SetParentID(id uuid.UUID) *CategoryCreate {
+	cc.mutation.SetParentID(id)
 	return cc
 }
 
-// SetNillableParentCategoryID sets the "parentCategory" edge to the Category entity by ID if the given value is not nil.
-func (cc *CategoryCreate) SetNillableParentCategoryID(id *uuid.UUID) *CategoryCreate {
+// SetNillableParentID sets the "parent" edge to the Category entity by ID if the given value is not nil.
+func (cc *CategoryCreate) SetNillableParentID(id *uuid.UUID) *CategoryCreate {
 	if id != nil {
-		cc = cc.SetParentCategoryID(*id)
+		cc = cc.SetParentID(*id)
 	}
 	return cc
 }
 
-// SetParentCategory sets the "parentCategory" edge to the Category entity.
-func (cc *CategoryCreate) SetParentCategory(c *Category) *CategoryCreate {
-	return cc.SetParentCategoryID(c.ID)
+// SetParent sets the "parent" edge to the Category entity.
+func (cc *CategoryCreate) SetParent(c *Category) *CategoryCreate {
+	return cc.SetParentID(c.ID)
 }
 
-// AddChildrenCategoryIDs adds the "childrenCategories" edge to the Category entity by IDs.
-func (cc *CategoryCreate) AddChildrenCategoryIDs(ids ...uuid.UUID) *CategoryCreate {
-	cc.mutation.AddChildrenCategoryIDs(ids...)
+// AddChildIDs adds the "children" edge to the Category entity by IDs.
+func (cc *CategoryCreate) AddChildIDs(ids ...uuid.UUID) *CategoryCreate {
+	cc.mutation.AddChildIDs(ids...)
 	return cc
 }
 
-// AddChildrenCategories adds the "childrenCategories" edges to the Category entity.
-func (cc *CategoryCreate) AddChildrenCategories(c ...*Category) *CategoryCreate {
+// AddChildren adds the "children" edges to the Category entity.
+func (cc *CategoryCreate) AddChildren(c ...*Category) *CategoryCreate {
 	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return cc.AddChildrenCategoryIDs(ids...)
+	return cc.AddChildIDs(ids...)
 }
 
 // AddProductIDs adds the "products" edge to the Product entity by IDs.
@@ -230,12 +230,12 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		})
 		_node.Name = value
 	}
-	if nodes := cc.mutation.ParentCategoryIDs(); len(nodes) > 0 {
+	if nodes := cc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   category.ParentCategoryTable,
-			Columns: []string{category.ParentCategoryColumn},
+			Table:   category.ParentTable,
+			Columns: []string{category.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -247,15 +247,15 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.CategoryID = nodes[0]
+		_node.ParentCategory = nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := cc.mutation.ChildrenCategoriesIDs(); len(nodes) > 0 {
+	if nodes := cc.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.ChildrenCategoriesTable,
-			Columns: []string{category.ChildrenCategoriesColumn},
+			Table:   category.ChildrenTable,
+			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

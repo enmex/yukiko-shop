@@ -2,6 +2,7 @@ version: '3.9'
 volumes:
   postgres_data:
   redis_data:
+  minio-storage:
 
 services:
   yukiko_db:

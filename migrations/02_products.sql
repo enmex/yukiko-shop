@@ -1,7 +1,7 @@
 CREATE TABLE categories (
     id uuid NOT NULL DEFAULT uuid_generate_v4() CONSTRAINT category_pk PRIMARY KEY,
     "name" TEXT NOT NULL,
-    parent_id uuid REFERENCES categories(id) ON DELETE SET NULL
+    parent_category uuid REFERENCES categories(id) ON DELETE SET NULL
 );
 
 CREATE UNIQUE INDEX category_name_idx ON categories("name");

@@ -35,58 +35,58 @@ func (cu *CategoryUpdate) SetName(s string) *CategoryUpdate {
 	return cu
 }
 
-// SetCategoryID sets the "category_id" field.
-func (cu *CategoryUpdate) SetCategoryID(u uuid.UUID) *CategoryUpdate {
-	cu.mutation.SetCategoryID(u)
+// SetParentCategory sets the "parent_category" field.
+func (cu *CategoryUpdate) SetParentCategory(u uuid.UUID) *CategoryUpdate {
+	cu.mutation.SetParentCategory(u)
 	return cu
 }
 
-// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (cu *CategoryUpdate) SetNillableCategoryID(u *uuid.UUID) *CategoryUpdate {
+// SetNillableParentCategory sets the "parent_category" field if the given value is not nil.
+func (cu *CategoryUpdate) SetNillableParentCategory(u *uuid.UUID) *CategoryUpdate {
 	if u != nil {
-		cu.SetCategoryID(*u)
+		cu.SetParentCategory(*u)
 	}
 	return cu
 }
 
-// ClearCategoryID clears the value of the "category_id" field.
-func (cu *CategoryUpdate) ClearCategoryID() *CategoryUpdate {
-	cu.mutation.ClearCategoryID()
+// ClearParentCategory clears the value of the "parent_category" field.
+func (cu *CategoryUpdate) ClearParentCategory() *CategoryUpdate {
+	cu.mutation.ClearParentCategory()
 	return cu
 }
 
-// SetParentCategoryID sets the "parentCategory" edge to the Category entity by ID.
-func (cu *CategoryUpdate) SetParentCategoryID(id uuid.UUID) *CategoryUpdate {
-	cu.mutation.SetParentCategoryID(id)
+// SetParentID sets the "parent" edge to the Category entity by ID.
+func (cu *CategoryUpdate) SetParentID(id uuid.UUID) *CategoryUpdate {
+	cu.mutation.SetParentID(id)
 	return cu
 }
 
-// SetNillableParentCategoryID sets the "parentCategory" edge to the Category entity by ID if the given value is not nil.
-func (cu *CategoryUpdate) SetNillableParentCategoryID(id *uuid.UUID) *CategoryUpdate {
+// SetNillableParentID sets the "parent" edge to the Category entity by ID if the given value is not nil.
+func (cu *CategoryUpdate) SetNillableParentID(id *uuid.UUID) *CategoryUpdate {
 	if id != nil {
-		cu = cu.SetParentCategoryID(*id)
+		cu = cu.SetParentID(*id)
 	}
 	return cu
 }
 
-// SetParentCategory sets the "parentCategory" edge to the Category entity.
-func (cu *CategoryUpdate) SetParentCategory(c *Category) *CategoryUpdate {
-	return cu.SetParentCategoryID(c.ID)
+// SetParent sets the "parent" edge to the Category entity.
+func (cu *CategoryUpdate) SetParent(c *Category) *CategoryUpdate {
+	return cu.SetParentID(c.ID)
 }
 
-// AddChildrenCategoryIDs adds the "childrenCategories" edge to the Category entity by IDs.
-func (cu *CategoryUpdate) AddChildrenCategoryIDs(ids ...uuid.UUID) *CategoryUpdate {
-	cu.mutation.AddChildrenCategoryIDs(ids...)
+// AddChildIDs adds the "children" edge to the Category entity by IDs.
+func (cu *CategoryUpdate) AddChildIDs(ids ...uuid.UUID) *CategoryUpdate {
+	cu.mutation.AddChildIDs(ids...)
 	return cu
 }
 
-// AddChildrenCategories adds the "childrenCategories" edges to the Category entity.
-func (cu *CategoryUpdate) AddChildrenCategories(c ...*Category) *CategoryUpdate {
+// AddChildren adds the "children" edges to the Category entity.
+func (cu *CategoryUpdate) AddChildren(c ...*Category) *CategoryUpdate {
 	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return cu.AddChildrenCategoryIDs(ids...)
+	return cu.AddChildIDs(ids...)
 }
 
 // AddProductIDs adds the "products" edge to the Product entity by IDs.
@@ -109,31 +109,31 @@ func (cu *CategoryUpdate) Mutation() *CategoryMutation {
 	return cu.mutation
 }
 
-// ClearParentCategory clears the "parentCategory" edge to the Category entity.
-func (cu *CategoryUpdate) ClearParentCategory() *CategoryUpdate {
-	cu.mutation.ClearParentCategory()
+// ClearParent clears the "parent" edge to the Category entity.
+func (cu *CategoryUpdate) ClearParent() *CategoryUpdate {
+	cu.mutation.ClearParent()
 	return cu
 }
 
-// ClearChildrenCategories clears all "childrenCategories" edges to the Category entity.
-func (cu *CategoryUpdate) ClearChildrenCategories() *CategoryUpdate {
-	cu.mutation.ClearChildrenCategories()
+// ClearChildren clears all "children" edges to the Category entity.
+func (cu *CategoryUpdate) ClearChildren() *CategoryUpdate {
+	cu.mutation.ClearChildren()
 	return cu
 }
 
-// RemoveChildrenCategoryIDs removes the "childrenCategories" edge to Category entities by IDs.
-func (cu *CategoryUpdate) RemoveChildrenCategoryIDs(ids ...uuid.UUID) *CategoryUpdate {
-	cu.mutation.RemoveChildrenCategoryIDs(ids...)
+// RemoveChildIDs removes the "children" edge to Category entities by IDs.
+func (cu *CategoryUpdate) RemoveChildIDs(ids ...uuid.UUID) *CategoryUpdate {
+	cu.mutation.RemoveChildIDs(ids...)
 	return cu
 }
 
-// RemoveChildrenCategories removes "childrenCategories" edges to Category entities.
-func (cu *CategoryUpdate) RemoveChildrenCategories(c ...*Category) *CategoryUpdate {
+// RemoveChildren removes "children" edges to Category entities.
+func (cu *CategoryUpdate) RemoveChildren(c ...*Category) *CategoryUpdate {
 	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return cu.RemoveChildrenCategoryIDs(ids...)
+	return cu.RemoveChildIDs(ids...)
 }
 
 // ClearProducts clears all "products" edges to the Product entity.
@@ -236,12 +236,12 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: category.FieldName,
 		})
 	}
-	if cu.mutation.ParentCategoryCleared() {
+	if cu.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   category.ParentCategoryTable,
-			Columns: []string{category.ParentCategoryColumn},
+			Table:   category.ParentTable,
+			Columns: []string{category.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -252,12 +252,12 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.ParentCategoryIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   category.ParentCategoryTable,
-			Columns: []string{category.ParentCategoryColumn},
+			Table:   category.ParentTable,
+			Columns: []string{category.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -271,12 +271,12 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cu.mutation.ChildrenCategoriesCleared() {
+	if cu.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.ChildrenCategoriesTable,
-			Columns: []string{category.ChildrenCategoriesColumn},
+			Table:   category.ChildrenTable,
+			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -287,12 +287,12 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.RemovedChildrenCategoriesIDs(); len(nodes) > 0 && !cu.mutation.ChildrenCategoriesCleared() {
+	if nodes := cu.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !cu.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.ChildrenCategoriesTable,
-			Columns: []string{category.ChildrenCategoriesColumn},
+			Table:   category.ChildrenTable,
+			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -306,12 +306,12 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.ChildrenCategoriesIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.ChildrenCategoriesTable,
-			Columns: []string{category.ChildrenCategoriesColumn},
+			Table:   category.ChildrenTable,
+			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -404,58 +404,58 @@ func (cuo *CategoryUpdateOne) SetName(s string) *CategoryUpdateOne {
 	return cuo
 }
 
-// SetCategoryID sets the "category_id" field.
-func (cuo *CategoryUpdateOne) SetCategoryID(u uuid.UUID) *CategoryUpdateOne {
-	cuo.mutation.SetCategoryID(u)
+// SetParentCategory sets the "parent_category" field.
+func (cuo *CategoryUpdateOne) SetParentCategory(u uuid.UUID) *CategoryUpdateOne {
+	cuo.mutation.SetParentCategory(u)
 	return cuo
 }
 
-// SetNillableCategoryID sets the "category_id" field if the given value is not nil.
-func (cuo *CategoryUpdateOne) SetNillableCategoryID(u *uuid.UUID) *CategoryUpdateOne {
+// SetNillableParentCategory sets the "parent_category" field if the given value is not nil.
+func (cuo *CategoryUpdateOne) SetNillableParentCategory(u *uuid.UUID) *CategoryUpdateOne {
 	if u != nil {
-		cuo.SetCategoryID(*u)
+		cuo.SetParentCategory(*u)
 	}
 	return cuo
 }
 
-// ClearCategoryID clears the value of the "category_id" field.
-func (cuo *CategoryUpdateOne) ClearCategoryID() *CategoryUpdateOne {
-	cuo.mutation.ClearCategoryID()
+// ClearParentCategory clears the value of the "parent_category" field.
+func (cuo *CategoryUpdateOne) ClearParentCategory() *CategoryUpdateOne {
+	cuo.mutation.ClearParentCategory()
 	return cuo
 }
 
-// SetParentCategoryID sets the "parentCategory" edge to the Category entity by ID.
-func (cuo *CategoryUpdateOne) SetParentCategoryID(id uuid.UUID) *CategoryUpdateOne {
-	cuo.mutation.SetParentCategoryID(id)
+// SetParentID sets the "parent" edge to the Category entity by ID.
+func (cuo *CategoryUpdateOne) SetParentID(id uuid.UUID) *CategoryUpdateOne {
+	cuo.mutation.SetParentID(id)
 	return cuo
 }
 
-// SetNillableParentCategoryID sets the "parentCategory" edge to the Category entity by ID if the given value is not nil.
-func (cuo *CategoryUpdateOne) SetNillableParentCategoryID(id *uuid.UUID) *CategoryUpdateOne {
+// SetNillableParentID sets the "parent" edge to the Category entity by ID if the given value is not nil.
+func (cuo *CategoryUpdateOne) SetNillableParentID(id *uuid.UUID) *CategoryUpdateOne {
 	if id != nil {
-		cuo = cuo.SetParentCategoryID(*id)
+		cuo = cuo.SetParentID(*id)
 	}
 	return cuo
 }
 
-// SetParentCategory sets the "parentCategory" edge to the Category entity.
-func (cuo *CategoryUpdateOne) SetParentCategory(c *Category) *CategoryUpdateOne {
-	return cuo.SetParentCategoryID(c.ID)
+// SetParent sets the "parent" edge to the Category entity.
+func (cuo *CategoryUpdateOne) SetParent(c *Category) *CategoryUpdateOne {
+	return cuo.SetParentID(c.ID)
 }
 
-// AddChildrenCategoryIDs adds the "childrenCategories" edge to the Category entity by IDs.
-func (cuo *CategoryUpdateOne) AddChildrenCategoryIDs(ids ...uuid.UUID) *CategoryUpdateOne {
-	cuo.mutation.AddChildrenCategoryIDs(ids...)
+// AddChildIDs adds the "children" edge to the Category entity by IDs.
+func (cuo *CategoryUpdateOne) AddChildIDs(ids ...uuid.UUID) *CategoryUpdateOne {
+	cuo.mutation.AddChildIDs(ids...)
 	return cuo
 }
 
-// AddChildrenCategories adds the "childrenCategories" edges to the Category entity.
-func (cuo *CategoryUpdateOne) AddChildrenCategories(c ...*Category) *CategoryUpdateOne {
+// AddChildren adds the "children" edges to the Category entity.
+func (cuo *CategoryUpdateOne) AddChildren(c ...*Category) *CategoryUpdateOne {
 	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return cuo.AddChildrenCategoryIDs(ids...)
+	return cuo.AddChildIDs(ids...)
 }
 
 // AddProductIDs adds the "products" edge to the Product entity by IDs.
@@ -478,31 +478,31 @@ func (cuo *CategoryUpdateOne) Mutation() *CategoryMutation {
 	return cuo.mutation
 }
 
-// ClearParentCategory clears the "parentCategory" edge to the Category entity.
-func (cuo *CategoryUpdateOne) ClearParentCategory() *CategoryUpdateOne {
-	cuo.mutation.ClearParentCategory()
+// ClearParent clears the "parent" edge to the Category entity.
+func (cuo *CategoryUpdateOne) ClearParent() *CategoryUpdateOne {
+	cuo.mutation.ClearParent()
 	return cuo
 }
 
-// ClearChildrenCategories clears all "childrenCategories" edges to the Category entity.
-func (cuo *CategoryUpdateOne) ClearChildrenCategories() *CategoryUpdateOne {
-	cuo.mutation.ClearChildrenCategories()
+// ClearChildren clears all "children" edges to the Category entity.
+func (cuo *CategoryUpdateOne) ClearChildren() *CategoryUpdateOne {
+	cuo.mutation.ClearChildren()
 	return cuo
 }
 
-// RemoveChildrenCategoryIDs removes the "childrenCategories" edge to Category entities by IDs.
-func (cuo *CategoryUpdateOne) RemoveChildrenCategoryIDs(ids ...uuid.UUID) *CategoryUpdateOne {
-	cuo.mutation.RemoveChildrenCategoryIDs(ids...)
+// RemoveChildIDs removes the "children" edge to Category entities by IDs.
+func (cuo *CategoryUpdateOne) RemoveChildIDs(ids ...uuid.UUID) *CategoryUpdateOne {
+	cuo.mutation.RemoveChildIDs(ids...)
 	return cuo
 }
 
-// RemoveChildrenCategories removes "childrenCategories" edges to Category entities.
-func (cuo *CategoryUpdateOne) RemoveChildrenCategories(c ...*Category) *CategoryUpdateOne {
+// RemoveChildren removes "children" edges to Category entities.
+func (cuo *CategoryUpdateOne) RemoveChildren(c ...*Category) *CategoryUpdateOne {
 	ids := make([]uuid.UUID, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return cuo.RemoveChildrenCategoryIDs(ids...)
+	return cuo.RemoveChildIDs(ids...)
 }
 
 // ClearProducts clears all "products" edges to the Product entity.
@@ -629,12 +629,12 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 			Column: category.FieldName,
 		})
 	}
-	if cuo.mutation.ParentCategoryCleared() {
+	if cuo.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   category.ParentCategoryTable,
-			Columns: []string{category.ParentCategoryColumn},
+			Table:   category.ParentTable,
+			Columns: []string{category.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -645,12 +645,12 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.ParentCategoryIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   category.ParentCategoryTable,
-			Columns: []string{category.ParentCategoryColumn},
+			Table:   category.ParentTable,
+			Columns: []string{category.ParentColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -664,12 +664,12 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cuo.mutation.ChildrenCategoriesCleared() {
+	if cuo.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.ChildrenCategoriesTable,
-			Columns: []string{category.ChildrenCategoriesColumn},
+			Table:   category.ChildrenTable,
+			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -680,12 +680,12 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.RemovedChildrenCategoriesIDs(); len(nodes) > 0 && !cuo.mutation.ChildrenCategoriesCleared() {
+	if nodes := cuo.mutation.RemovedChildrenIDs(); len(nodes) > 0 && !cuo.mutation.ChildrenCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.ChildrenCategoriesTable,
-			Columns: []string{category.ChildrenCategoriesColumn},
+			Table:   category.ChildrenTable,
+			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -699,12 +699,12 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.ChildrenCategoriesIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.ChildrenIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   category.ChildrenCategoriesTable,
-			Columns: []string{category.ChildrenCategoriesColumn},
+			Table:   category.ChildrenTable,
+			Columns: []string{category.ChildrenColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{

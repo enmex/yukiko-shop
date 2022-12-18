@@ -13,24 +13,24 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
-	// FieldCategoryID holds the string denoting the category_id field in the database.
-	FieldCategoryID = "category_id"
-	// EdgeParentCategory holds the string denoting the parentcategory edge name in mutations.
-	EdgeParentCategory = "parentCategory"
-	// EdgeChildrenCategories holds the string denoting the childrencategories edge name in mutations.
-	EdgeChildrenCategories = "childrenCategories"
+	// FieldParentCategory holds the string denoting the parent_category field in the database.
+	FieldParentCategory = "parent_category"
+	// EdgeParent holds the string denoting the parent edge name in mutations.
+	EdgeParent = "parent"
+	// EdgeChildren holds the string denoting the children edge name in mutations.
+	EdgeChildren = "children"
 	// EdgeProducts holds the string denoting the products edge name in mutations.
 	EdgeProducts = "products"
 	// Table holds the table name of the category in the database.
 	Table = "categories"
-	// ParentCategoryTable is the table that holds the parentCategory relation/edge.
-	ParentCategoryTable = "categories"
-	// ParentCategoryColumn is the table column denoting the parentCategory relation/edge.
-	ParentCategoryColumn = "category_id"
-	// ChildrenCategoriesTable is the table that holds the childrenCategories relation/edge.
-	ChildrenCategoriesTable = "categories"
-	// ChildrenCategoriesColumn is the table column denoting the childrenCategories relation/edge.
-	ChildrenCategoriesColumn = "category_id"
+	// ParentTable is the table that holds the parent relation/edge.
+	ParentTable = "categories"
+	// ParentColumn is the table column denoting the parent relation/edge.
+	ParentColumn = "parent_category"
+	// ChildrenTable is the table that holds the children relation/edge.
+	ChildrenTable = "categories"
+	// ChildrenColumn is the table column denoting the children relation/edge.
+	ChildrenColumn = "parent_category"
 	// ProductsTable is the table that holds the products relation/edge.
 	ProductsTable = "products"
 	// ProductsInverseTable is the table name for the Product entity.
@@ -44,7 +44,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
-	FieldCategoryID,
+	FieldParentCategory,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

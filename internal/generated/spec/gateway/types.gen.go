@@ -16,9 +16,16 @@ type AuthResponse struct {
 // Category defines model for Category.
 type Category struct {
 	ChildrenCategories *[]Category `json:"childrenCategories,omitempty"`
+	Id                 string      `json:"id"`
 	Name               string      `json:"name"`
 	ParentCategory     *Category   `json:"parentCategory,omitempty"`
 	Products           *[]Product  `json:"products,omitempty"`
+}
+
+// CreateCategoryRequest defines model for CreateCategoryRequest.
+type CreateCategoryRequest struct {
+	Name           string  `json:"name"`
+	ParentCategory *string `json:"parentCategory,omitempty"`
 }
 
 // CreateProductRequest defines model for CreateProductRequest.
@@ -123,6 +130,9 @@ type PostAuthSignInJSONBody SignInRequest
 // PostAuthSignUpJSONBody defines parameters for PostAuthSignUp.
 type PostAuthSignUpJSONBody SignUpRequest
 
+// PostCategoriesJSONBody defines parameters for PostCategories.
+type PostCategoriesJSONBody CreateCategoryRequest
+
 // GetProductsParams defines parameters for GetProducts.
 type GetProductsParams struct {
 	Limit *int `json:"limit,omitempty"`
@@ -140,6 +150,8 @@ type PostAuthSignInJSONRequestBody PostAuthSignInJSONBody
 // PostAuthSignUpJSONRequestBody defines body for PostAuthSignUp for application/json ContentType.
 type PostAuthSignUpJSONRequestBody PostAuthSignUpJSONBody
 
+// PostCategoriesJSONRequestBody defines body for PostCategories for application/json ContentType.
+type PostCategoriesJSONRequestBody PostCategoriesJSONBody
+
 // PostProductsJSONRequestBody defines body for PostProducts for application/json ContentType.
 type PostProductsJSONRequestBody PostProductsJSONBody
-

@@ -12,7 +12,7 @@ var (
 	CategoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "category_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "parent_category", Type: field.TypeUUID, Nullable: true},
 	}
 	// CategoriesTable holds the schema information for the "categories" table.
 	CategoriesTable = &schema.Table{
@@ -21,7 +21,7 @@ var (
 		PrimaryKey: []*schema.Column{CategoriesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "categories_categories_childrenCategories",
+				Symbol:     "categories_categories_children",
 				Columns:    []*schema.Column{CategoriesColumns[2]},
 				RefColumns: []*schema.Column{CategoriesColumns[0]},
 				OnDelete:   schema.SetNull,

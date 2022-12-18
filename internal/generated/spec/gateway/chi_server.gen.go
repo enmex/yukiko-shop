@@ -23,6 +23,9 @@ type ServerInterface interface {
 	// Регистрация пользователя
 	// (POST /auth/signUp)
 	PostAuthSignUp(w http.ResponseWriter, r *http.Request)
+	// Добавить новую категорию
+	// (POST /categories)
+	PostCategories(w http.ResponseWriter, r *http.Request)
 	// Получить список товаров
 	// (GET /products)
 	GetProducts(w http.ResponseWriter, r *http.Request, params GetProductsParams)
@@ -91,6 +94,21 @@ func (siw *ServerInterfaceWrapper) PostAuthSignUp(w http.ResponseWriter, r *http
 	handler(w, r.WithContext(ctx))
 }
 
+// PostCategories operation middleware
+func (siw *ServerInterfaceWrapper) PostCategories(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostCategories(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
 // GetProducts operation middleware
 func (siw *ServerInterfaceWrapper) GetProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -126,7 +144,7 @@ func (siw *ServerInterfaceWrapper) GetProducts(w http.ResponseWriter, r *http.Re
 func (siw *ServerInterfaceWrapper) PostProducts(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{"admin", "manager"})
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{"ADMIN", "MANAGER"})
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostProducts(w, r)
@@ -154,7 +172,7 @@ func (siw *ServerInterfaceWrapper) DeleteProductsProductID(w http.ResponseWriter
 		return
 	}
 
-	ctx = context.WithValue(ctx, BearerAuthScopes, []string{"admin", "manager"})
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{"ADMIN", "MANAGER"})
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.DeleteProductsProductID(w, r, productID)
@@ -316,6 +334,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Post(options.BaseURL+"/auth/signUp", wrapper.PostAuthSignUp)
 	})
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/categories", wrapper.PostCategories)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/products", wrapper.GetProducts)
 	})
 	r.Group(func(r chi.Router) {
@@ -330,4 +351,3 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 
 	return r
 }
-

@@ -21,3 +21,7 @@ type ProductUseCase interface {
 	GetProducts(ctx context.Context, limit *int) ([]specProduct.Product, error)
 	DeleteProduct(ctx context.Context, productID uuid.UUID) error
 }
+
+type CategoryUseCase interface {
+	CreateCategory(ctx context.Context, category *domain.Category) (*specProduct.Category, error)
+}

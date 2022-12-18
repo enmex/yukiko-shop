@@ -32,6 +32,7 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *domain.User) (
 		SetFirstName(user.FirstName).
 		SetLastName(user.LastName).
 		SetPassword(user.Password).
+		SetAccessType("ADMIN").
 		Save(ctx)
 
 	if err != nil {

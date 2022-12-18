@@ -223,15 +223,15 @@ func (c *CategoryClient) GetX(ctx context.Context, id uuid.UUID) *Category {
 	return obj
 }
 
-// QueryParentCategory queries the parentCategory edge of a Category.
-func (c *CategoryClient) QueryParentCategory(ca *Category) *CategoryQuery {
+// QueryParent queries the parent edge of a Category.
+func (c *CategoryClient) QueryParent(ca *Category) *CategoryQuery {
 	query := &CategoryQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := ca.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(category.Table, category.FieldID, id),
 			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, category.ParentCategoryTable, category.ParentCategoryColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, category.ParentTable, category.ParentColumn),
 		)
 		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
 		return fromV, nil
@@ -239,15 +239,15 @@ func (c *CategoryClient) QueryParentCategory(ca *Category) *CategoryQuery {
 	return query
 }
 
-// QueryChildrenCategories queries the childrenCategories edge of a Category.
-func (c *CategoryClient) QueryChildrenCategories(ca *Category) *CategoryQuery {
+// QueryChildren queries the children edge of a Category.
+func (c *CategoryClient) QueryChildren(ca *Category) *CategoryQuery {
 	query := &CategoryQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := ca.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(category.Table, category.FieldID, id),
 			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, category.ChildrenCategoriesTable, category.ChildrenCategoriesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, category.ChildrenTable, category.ChildrenColumn),
 		)
 		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
 		return fromV, nil

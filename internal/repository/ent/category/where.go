@@ -100,10 +100,10 @@ func Name(v string) predicate.Category {
 	})
 }
 
-// CategoryID applies equality check predicate on the "category_id" field. It's identical to CategoryIDEQ.
-func CategoryID(v uuid.UUID) predicate.Category {
+// ParentCategory applies equality check predicate on the "parent_category" field. It's identical to ParentCategoryEQ.
+func ParentCategory(v uuid.UUID) predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCategoryID), v))
+		s.Where(sql.EQ(s.C(FieldParentCategory), v))
 	})
 }
 
@@ -218,22 +218,22 @@ func NameContainsFold(v string) predicate.Category {
 	})
 }
 
-// CategoryIDEQ applies the EQ predicate on the "category_id" field.
-func CategoryIDEQ(v uuid.UUID) predicate.Category {
+// ParentCategoryEQ applies the EQ predicate on the "parent_category" field.
+func ParentCategoryEQ(v uuid.UUID) predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldCategoryID), v))
+		s.Where(sql.EQ(s.C(FieldParentCategory), v))
 	})
 }
 
-// CategoryIDNEQ applies the NEQ predicate on the "category_id" field.
-func CategoryIDNEQ(v uuid.UUID) predicate.Category {
+// ParentCategoryNEQ applies the NEQ predicate on the "parent_category" field.
+func ParentCategoryNEQ(v uuid.UUID) predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldCategoryID), v))
+		s.Where(sql.NEQ(s.C(FieldParentCategory), v))
 	})
 }
 
-// CategoryIDIn applies the In predicate on the "category_id" field.
-func CategoryIDIn(vs ...uuid.UUID) predicate.Category {
+// ParentCategoryIn applies the In predicate on the "parent_category" field.
+func ParentCategoryIn(vs ...uuid.UUID) predicate.Category {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -245,12 +245,12 @@ func CategoryIDIn(vs ...uuid.UUID) predicate.Category {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldCategoryID), v...))
+		s.Where(sql.In(s.C(FieldParentCategory), v...))
 	})
 }
 
-// CategoryIDNotIn applies the NotIn predicate on the "category_id" field.
-func CategoryIDNotIn(vs ...uuid.UUID) predicate.Category {
+// ParentCategoryNotIn applies the NotIn predicate on the "parent_category" field.
+func ParentCategoryNotIn(vs ...uuid.UUID) predicate.Category {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -262,43 +262,43 @@ func CategoryIDNotIn(vs ...uuid.UUID) predicate.Category {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldCategoryID), v...))
+		s.Where(sql.NotIn(s.C(FieldParentCategory), v...))
 	})
 }
 
-// CategoryIDIsNil applies the IsNil predicate on the "category_id" field.
-func CategoryIDIsNil() predicate.Category {
+// ParentCategoryIsNil applies the IsNil predicate on the "parent_category" field.
+func ParentCategoryIsNil() predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldCategoryID)))
+		s.Where(sql.IsNull(s.C(FieldParentCategory)))
 	})
 }
 
-// CategoryIDNotNil applies the NotNil predicate on the "category_id" field.
-func CategoryIDNotNil() predicate.Category {
+// ParentCategoryNotNil applies the NotNil predicate on the "parent_category" field.
+func ParentCategoryNotNil() predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldCategoryID)))
+		s.Where(sql.NotNull(s.C(FieldParentCategory)))
 	})
 }
 
-// HasParentCategory applies the HasEdge predicate on the "parentCategory" edge.
-func HasParentCategory() predicate.Category {
+// HasParent applies the HasEdge predicate on the "parent" edge.
+func HasParent() predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ParentCategoryTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ParentCategoryTable, ParentCategoryColumn),
+			sqlgraph.To(ParentTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasParentCategoryWith applies the HasEdge predicate on the "parentCategory" edge with a given conditions (other predicates).
-func HasParentCategoryWith(preds ...predicate.Category) predicate.Category {
+// HasParentWith applies the HasEdge predicate on the "parent" edge with a given conditions (other predicates).
+func HasParentWith(preds ...predicate.Category) predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, ParentCategoryTable, ParentCategoryColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, ParentTable, ParentColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -308,25 +308,25 @@ func HasParentCategoryWith(preds ...predicate.Category) predicate.Category {
 	})
 }
 
-// HasChildrenCategories applies the HasEdge predicate on the "childrenCategories" edge.
-func HasChildrenCategories() predicate.Category {
+// HasChildren applies the HasEdge predicate on the "children" edge.
+func HasChildren() predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ChildrenCategoriesTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenCategoriesTable, ChildrenCategoriesColumn),
+			sqlgraph.To(ChildrenTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasChildrenCategoriesWith applies the HasEdge predicate on the "childrenCategories" edge with a given conditions (other predicates).
-func HasChildrenCategoriesWith(preds ...predicate.Category) predicate.Category {
+// HasChildrenWith applies the HasEdge predicate on the "children" edge with a given conditions (other predicates).
+func HasChildrenWith(preds ...predicate.Category) predicate.Category {
 	return predicate.Category(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenCategoriesTable, ChildrenCategoriesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, ChildrenTable, ChildrenColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

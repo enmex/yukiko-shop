@@ -4,7 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-	adapter "yukiko-shop/internal/adapter/product"
+	productAdapter "yukiko-shop/internal/adapter/product"
+	categoryAdapter "yukiko-shop/internal/adapter/category"
 	"yukiko-shop/internal/domain"
 	spec "yukiko-shop/internal/generated/spec/product"
 	"yukiko-shop/pkg/response"
@@ -23,7 +24,7 @@ func (s Server) PostProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product := adapter.PrepareProduct(&request)
+	product := productAdapter.PrepareProduct(&request)
 
 	productResponse, err := s.productUseCase.CreateProduct(ctx, product)
 	if err != nil {
@@ -127,4 +128,33 @@ func (s Server) GetProducts(w http.ResponseWriter, r *http.Request, params spec.
 	response.JSON(w, http.StatusOK, spec.GetProductsResponse{
 		Products: products,
 	})
+}
+
+func (s Server) PostCategories(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var request spec.CreateCategoryRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),	
+		})
+		return
+	}
+
+	_, err := s.categoryUseCase.CreateCategory(ctx, categoryAdapter.PrepareCategory(&request))
+	if err != nil {
+		var statusCode int
+		if strings.EqualFold(err.Error(), domain.CategoryAlreadyExistsErr.Error()) {
+			statusCode = http.StatusBadRequest
+		} else {
+			statusCode = http.StatusInternalServerError
+		}
+
+		response.JSON(w, statusCode, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.EmptyJSON(w, http.StatusOK)
 }

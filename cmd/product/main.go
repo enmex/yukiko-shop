@@ -7,7 +7,7 @@ import (
 	"yukiko-shop/internal/generated/spec/product"
 	"yukiko-shop/internal/repository"
 	productServer "yukiko-shop/internal/server/product"
-	productUseCase "yukiko-shop/internal/usecases/product"
+	usecase "yukiko-shop/internal/usecases/product"
 	"yukiko-shop/pkg/db"
 	"yukiko-shop/pkg/http"
 	"yukiko-shop/pkg/logger"
@@ -48,8 +48,11 @@ func run(logger *logrus.Logger) error {
 	}
 	defer dbClient.Close()
 
-	// repository
-	repo := repository.NewProductRepository(dbClient, logger)
+	// repository of product
+	productRepo := repository.NewProductRepository(dbClient, logger)
+
+	//repository of category
+	categoryRepo := repository.NewCategoryRepository(dbClient, logger)
 
 	//minio
 	minioClient, err := minio.NewClient(ctx, cfg.Minio)
@@ -57,18 +60,24 @@ func run(logger *logrus.Logger) error {
 		return err
 	}
 
-	//useCase
-	useCase := productUseCase.NewProductUseCase(
+	//productUseCase
+	productUseCase := usecase.NewProductUseCase(
 		logger,
-		repo,
+		productRepo,
 		minioClient,
+	)
+
+	//categoryUseCase
+	categoryUseCase := usecase.NewCategoryUseCase(
+		logger, 
+		categoryRepo,
 	)
 
 	// Server
 	srv := productServer.NewServer(
 		logger,
-		useCase,
-		//googleAuth,
+		productUseCase,
+		categoryUseCase,
 	)
 
 	options, err := productServer.NewServerOptions()

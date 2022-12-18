@@ -4,17 +4,17 @@ import (
 	"time"
 
 	"entgo.io/ent"
+	//"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
 )
 
-// User holds the schema definition for the User entity.
 type Product struct {
 	ent.Schema
 }
 
-// Fields of the User.
+// Fields of the Product.
 func (Product) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
@@ -27,7 +27,7 @@ func (Product) Fields() []ent.Field {
 	}
 }
 
-// Edges of the User.
+// Edges of the Product.
 func (Product) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("category", Category.Type).

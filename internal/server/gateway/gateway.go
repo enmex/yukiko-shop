@@ -131,3 +131,23 @@ func (s Server) GetProducts(w http.ResponseWriter, r *http.Request, params spec.
 
 	response.Reply(w, res.Code, []byte(*res.Body))
 }
+
+func (s Server) PostCategories(w http.ResponseWriter, r *http.Request) {
+	var request spec.CreateCategoryRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	res, err := httpRequest.Post(fmt.Sprintf("http://%s/categories", s.cfg.ProductServiceHost), request)
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}

@@ -42,6 +42,24 @@ paths:
         400:
           $ref: "#/components/responses/ErrorResponse"
 
+  /categories:
+    post:
+      tags:
+        - Product
+      description: Добавить новую категорию
+      summary: Добавить новую категорию
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCategoryRequest"
+      responses:
+        201:
+          description: Всё хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
   /products:
     post:
       tags: 
@@ -49,7 +67,7 @@ paths:
       description: Добавление товара
       summary: Добавление товара
       security:
-        - bearerAuth: [ "admin", "manager" ]
+        - bearerAuth: [ "ADMIN", "MANAGER" ]
       requestBody: 
         required: true
         content: 
@@ -96,7 +114,7 @@ paths:
       description: Удаление товара
       summary: Удаление товара 
       security:
-        - bearerAuth: [ "admin", "manager" ]
+        - bearerAuth: [ "ADMIN", "MANAGER" ]
       parameters:
         - $ref: "#/components/parameters/productID"
       responses:
@@ -169,8 +187,12 @@ components:
     Category:
       type: object
       required: 
+        - id
         - name
       properties:
+        id:
+          type: string
+          format: uuid
         parentCategory:
             $ref: "#/components/schemas/Category"
         name:
@@ -230,6 +252,17 @@ components:
           format: double
         categoryName:
           type: string
+
+    CreateCategoryRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        parentCategory:
+          type: string
+          format: uuid
 
     CreateProductResponse:
       type: object

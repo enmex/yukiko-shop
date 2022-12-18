@@ -17,17 +17,17 @@ func (Category) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
 		field.String("name").Unique(),
-		field.UUID("category_id", uuid.UUID{}).Optional(),
+		field.UUID("parent_category", uuid.UUID{}).Optional(),
 	}
 }
 
 // Edges of the User.
 func (Category) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("childrenCategories", Category.Type).
-			From("parentCategory").
+		edge.To("children", Category.Type).
+			From("parent").
 			Unique().
-			Field("category_id"),
+			Field("parent_category"),
 		edge.To("products", Product.Type),
 	}
 }
