@@ -13,5 +13,5 @@ type Product struct {
 	Category    Category
 	CreatedAt   time.Time
 	Price       float64
-	PhotoURL    string
+	PhotoURL    *string
 }

@@ -44,14 +44,18 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *domai
 		return nil, err
 	}
 
-	productEnt, err := repo.Client.Product.
+	qb := repo.Client.Product.
 		Create().
 		SetName(product.Name).
 		SetDescription(product.Description).
 		SetCategory(categoryEnt).
-		SetPhotoURL(product.PhotoURL).
-		SetPrice(product.Price).
-		Save(ctx)
+		SetPrice(product.Price)
+
+	if product.PhotoURL != nil {
+		qb = qb.SetPhotoURL(*product.PhotoURL)
+	}
+
+	productEnt, err := qb.Save(ctx)
 
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate") {
@@ -93,7 +97,7 @@ func (repo *ProductRepository) DeleteProduct(ctx context.Context, productID uuid
 }
 
 func (repo *ProductRepository) GetProducts(ctx context.Context, limit *int) ([]*ent.Product, error) {
-	qb := repo.Client.Product.Query()
+	qb := repo.Client.Product.Query().WithCategory()
 
 	if limit != nil {
 		qb = qb.Limit(*limit)

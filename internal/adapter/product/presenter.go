@@ -10,7 +10,7 @@ func PresentProduct(productEnt *ent.Product) *spec.Product {
 		Id:           productEnt.ID.String(),
 		Name:         productEnt.Name,
 		Description:  productEnt.Description,
-		PhotoUrl:     productEnt.PhotoURL,
+		PhotoUrl:     &productEnt.PhotoURL,
 		Price:        productEnt.Price,
 		CategoryName: productEnt.Edges.Category.Name,
 	}

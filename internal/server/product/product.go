@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-	productAdapter "yukiko-shop/internal/adapter/product"
 	categoryAdapter "yukiko-shop/internal/adapter/category"
+	productAdapter "yukiko-shop/internal/adapter/product"
 	"yukiko-shop/internal/domain"
 	spec "yukiko-shop/internal/generated/spec/product"
 	"yukiko-shop/pkg/response"
@@ -44,7 +44,7 @@ func (s Server) PostProducts(w http.ResponseWriter, r *http.Request) {
 		Id:           productResponse.Id,
 		Name:         productResponse.Name,
 		Description:  productResponse.Description,
-		PhotoUrl:     productResponse.PhotoUrl,
+		PhotoUrl:     *productResponse.PhotoUrl,
 		Price:        productResponse.Price,
 		CategoryName: productResponse.CategoryName,
 	})
@@ -80,7 +80,7 @@ func (s Server) GetProductsProductID(w http.ResponseWriter, r *http.Request, pro
 		Id:           productResponse.Id,
 		Name:         productResponse.Name,
 		Description:  productResponse.Description,
-		PhotoUrl:     productResponse.PhotoUrl,
+		PhotoUrl:     *productResponse.PhotoUrl,
 		Price:        productResponse.Price,
 		CategoryName: productResponse.CategoryName,
 	})
@@ -116,7 +116,7 @@ func (s Server) DeleteProductsProductID(w http.ResponseWriter, r *http.Request, 
 
 func (s Server) GetProducts(w http.ResponseWriter, r *http.Request, params spec.GetProductsParams) {
 	ctx := r.Context()
-	
+
 	products, err := s.productUseCase.GetProducts(ctx, params.Limit)
 	if err != nil {
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
@@ -136,7 +136,7 @@ func (s Server) PostCategories(w http.ResponseWriter, r *http.Request) {
 	var request spec.CreateCategoryRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
-			Message: err.Error(),	
+			Message: err.Error(),
 		})
 		return
 	}

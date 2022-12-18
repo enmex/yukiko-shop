@@ -69,7 +69,7 @@ func run(logger *logrus.Logger) error {
 
 	//categoryUseCase
 	categoryUseCase := usecase.NewCategoryUseCase(
-		logger, 
+		logger,
 		categoryRepo,
 	)
 

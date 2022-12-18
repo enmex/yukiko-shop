@@ -116,7 +116,6 @@ components:
       required: 
         - id
         - name
-        - photoUrl
         - description
         - price
         - categoryName

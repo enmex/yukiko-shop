@@ -48,6 +48,8 @@ paths:
         - Product
       description: Добавить новую категорию
       summary: Добавить новую категорию
+      security:
+        - bearerAuth: [ "ADMIN", "MANAGER" ]
       requestBody:
         required: true
         content:

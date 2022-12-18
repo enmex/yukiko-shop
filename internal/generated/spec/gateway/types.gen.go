@@ -155,3 +155,4 @@ type PostCategoriesJSONRequestBody PostCategoriesJSONBody
 
 // PostProductsJSONRequestBody defines body for PostProducts for application/json ContentType.
 type PostProductsJSONRequestBody PostProductsJSONBody
+

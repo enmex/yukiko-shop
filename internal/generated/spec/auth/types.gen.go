@@ -72,3 +72,4 @@ type PostAuthSignInJSONRequestBody PostAuthSignInJSONBody
 
 // PostAuthSignUpJSONRequestBody defines body for PostAuthSignUp for application/json ContentType.
 type PostAuthSignUpJSONRequestBody PostAuthSignUpJSONBody
+

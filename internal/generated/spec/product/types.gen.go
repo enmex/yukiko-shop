@@ -63,7 +63,7 @@ type Product struct {
 	Description  string  `json:"description"`
 	Id           string  `json:"id"`
 	Name         string  `json:"name"`
-	PhotoUrl     string  `json:"photoUrl"`
+	PhotoUrl     *string `json:"photoUrl,omitempty"`
 	Price        float64 `json:"price"`
 }
 
@@ -86,3 +86,4 @@ type PostCategoriesJSONRequestBody PostCategoriesJSONBody
 
 // PostProductsJSONRequestBody defines body for PostProducts for application/json ContentType.
 type PostProductsJSONRequestBody PostProductsJSONBody
+

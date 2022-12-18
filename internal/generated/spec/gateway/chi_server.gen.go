@@ -98,6 +98,8 @@ func (siw *ServerInterfaceWrapper) PostAuthSignUp(w http.ResponseWriter, r *http
 func (siw *ServerInterfaceWrapper) PostCategories(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
+	ctx = context.WithValue(ctx, BearerAuthScopes, []string{"ADMIN", "MANAGER"})
+
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostCategories(w, r)
 	}
@@ -351,3 +353,4 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 
 	return r
 }
+

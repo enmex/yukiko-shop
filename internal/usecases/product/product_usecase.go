@@ -39,8 +39,10 @@ func (u *ProductUseCase) CreateProduct(ctx context.Context, product *domain.Prod
 		return nil, err
 	}
 
-	if _, err := u.minioClient.UploadFile(ctx, fmt.Sprintf("product-%s", productEnt.ID), product.PhotoURL, "jpg"); err != nil {
-		return nil, err
+	if product.PhotoURL != nil {
+		if _, err := u.minioClient.UploadFile(ctx, fmt.Sprintf("product-%s", productEnt.ID), *product.PhotoURL, "jpg"); err != nil {
+			return nil, err
+		}
 	}
 
 	return adapter.PresentProduct(productEnt), nil
