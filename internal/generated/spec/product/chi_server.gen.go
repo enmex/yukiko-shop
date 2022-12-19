@@ -13,6 +13,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Получить список категорий
+	// (GET /categories)
+	GetCategories(w http.ResponseWriter, r *http.Request, params GetCategoriesParams)
 	// Добавить новую категорию
 	// (POST /categories)
 	PostCategories(w http.ResponseWriter, r *http.Request)
@@ -38,6 +41,37 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
+
+// GetCategories operation middleware
+func (siw *ServerInterfaceWrapper) GetCategories(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetCategoriesParams
+
+	// ------------- Optional query parameter "main" -------------
+	if paramValue := r.URL.Query().Get("main"); paramValue != "" {
+
+	}
+
+	err = runtime.BindQueryParameter("form", true, false, "main", r.URL.Query(), &params.Main)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "main", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCategories(w, r, params)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
 
 // PostCategories operation middleware
 func (siw *ServerInterfaceWrapper) PostCategories(w http.ResponseWriter, r *http.Request) {
@@ -265,6 +299,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/categories", wrapper.GetCategories)
+	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/categories", wrapper.PostCategories)
 	})

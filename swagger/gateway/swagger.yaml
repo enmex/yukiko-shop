@@ -61,6 +61,21 @@ paths:
           description: Всё хорошо
         400:
           $ref: "#/components/responses/ErrorResponse"
+    get:
+      tags:
+        - Category
+      description: Получить список категорий
+      summary: Получить список категорий
+      parameters:
+        - in: query
+          name: main
+          schema:
+            type: boolean
+      responses:
+        200: 
+          description: Все хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
 
   /products:
     post:

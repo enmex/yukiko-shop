@@ -42,6 +42,11 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// GetCategoriesResponse defines model for GetCategoriesResponse.
+type GetCategoriesResponse struct {
+	Categories []string `json:"categories"`
+}
+
 // GetProductResponse defines model for GetProductResponse.
 type GetProductResponse struct {
 	CategoryName string  `json:"categoryName"`
@@ -69,6 +74,11 @@ type Product struct {
 
 // ProductID defines model for productID.
 type ProductID string
+
+// GetCategoriesParams defines parameters for GetCategories.
+type GetCategoriesParams struct {
+	Main *bool `json:"main,omitempty"`
+}
 
 // PostCategoriesJSONBody defines parameters for PostCategories.
 type PostCategoriesJSONBody CreateCategoryRequest

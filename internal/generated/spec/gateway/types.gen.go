@@ -130,6 +130,11 @@ type PostAuthSignInJSONBody SignInRequest
 // PostAuthSignUpJSONBody defines parameters for PostAuthSignUp.
 type PostAuthSignUpJSONBody SignUpRequest
 
+// GetCategoriesParams defines parameters for GetCategories.
+type GetCategoriesParams struct {
+	Main *bool `json:"main,omitempty"`
+}
+
 // PostCategoriesJSONBody defines parameters for PostCategories.
 type PostCategoriesJSONBody CreateCategoryRequest
 

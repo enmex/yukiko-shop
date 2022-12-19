@@ -151,3 +151,22 @@ func (s Server) PostCategories(w http.ResponseWriter, r *http.Request) {
 
 	response.Reply(w, res.Code, []byte(*res.Body))
 }
+
+func (s Server) GetCategories(w http.ResponseWriter, r *http.Request, params spec.GetCategoriesParams) {
+	var url string
+	if params.Main != nil {
+		url = fmt.Sprintf("http://%s/categories?main=%t", s.cfg.ProductServiceHost, *params.Main)
+	} else {
+		url = fmt.Sprintf("http://%s/categories", s.cfg.ProductServiceHost)
+	}
+
+	res, err := httpRequest.Get(url)
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}

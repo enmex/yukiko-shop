@@ -5,6 +5,7 @@ import (
 	"strings"
 	"yukiko-shop/internal/domain"
 	"yukiko-shop/internal/repository/ent"
+	"yukiko-shop/internal/repository/ent/category"
 
 	"github.com/sirupsen/logrus"
 )
@@ -39,4 +40,19 @@ func (repo *CategoryRepository) CreateCategory(ctx context.Context, category *do
 	}
 
 	return categoryEnt, nil
+}
+
+func (repo *CategoryRepository) GetCategories(ctx context.Context, main *bool) ([]*ent.Category, error) {
+	qb := repo.Client.Category.Query()
+
+	if main != nil && *main {
+		qb = qb.Where(category.ParentCategoryIsNil())
+	}
+
+	categoriesEnt, err := qb.All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return categoriesEnt, nil
 }

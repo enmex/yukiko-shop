@@ -27,6 +27,7 @@ func (s Server) PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request) {
 		} else {
 			statusCode = http.StatusInternalServerError
 		}
+		s.logger.Infof("/auth/sendVerifyCode Error: %s", err.Error())
 		response.JSON(w, statusCode, spec.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -53,7 +54,7 @@ func (s Server) PostAuthSignIn(w http.ResponseWriter, r *http.Request) {
 		} else {
 			statusCode = http.StatusInternalServerError
 		}
-
+		s.logger.Infof("/auth/signIn Error: %s", err.Error())
 		response.JSON(w, statusCode, spec.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -84,7 +85,7 @@ func (s Server) PostAuthSignUp(w http.ResponseWriter, r *http.Request) {
 		} else {
 			statusCode = http.StatusInternalServerError
 		}
-
+		s.logger.Infof("/auth/signUp Error: %s", err.Error())
 		response.JSON(w, statusCode, spec.ErrorResponse{
 			Message: err.Error(),
 		})

@@ -30,3 +30,17 @@ func (u *CategoryUseCase) CreateCategory(ctx context.Context, category *domain.C
 
 	return adapter.PresentCategory(categoryEnt), nil
 }
+
+func (u *CategoryUseCase) GetCategories(ctx context.Context, main *bool) ([]string, error) {
+	categoriesEnt, err := u.categoryRepository.GetCategories(ctx, main)
+	if err != nil {
+		return nil, err
+	}
+
+	var categories []string
+	for _, category := range categoriesEnt {
+		categories = append(categories, category.Name)
+	}
+
+	return categories, nil
+}

@@ -24,4 +24,5 @@ type ProductUseCase interface {
 
 type CategoryUseCase interface {
 	CreateCategory(ctx context.Context, category *domain.Category) (*specProduct.Category, error)
+	GetCategories(ctx context.Context, main *bool) ([]string, error)
 }

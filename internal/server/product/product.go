@@ -18,6 +18,7 @@ func (s Server) PostProducts(w http.ResponseWriter, r *http.Request) {
 
 	var request spec.CreateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		s.logger.Warnf("POST /products Error: %s", err.Error())
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -34,6 +35,7 @@ func (s Server) PostProducts(w http.ResponseWriter, r *http.Request) {
 		} else {
 			statusCode = http.StatusInternalServerError
 		}
+		s.logger.Warnf("POST /products Error: %s", err.Error())
 		response.JSON(w, statusCode, spec.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -69,7 +71,7 @@ func (s Server) GetProductsProductID(w http.ResponseWriter, r *http.Request, pro
 		} else {
 			statusCode = http.StatusInternalServerError
 		}
-
+		s.logger.Infof("GET /products/%s Error: %s", productResponse.Id, err.Error())
 		response.JSON(w, statusCode, spec.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -104,7 +106,7 @@ func (s Server) DeleteProductsProductID(w http.ResponseWriter, r *http.Request, 
 		} else {
 			statusCode = http.StatusInternalServerError
 		}
-
+		s.logger.Infof("DELETE /products/%s Error: %s", string(productID), err.Error())
 		response.JSON(w, statusCode, spec.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -119,6 +121,7 @@ func (s Server) GetProducts(w http.ResponseWriter, r *http.Request, params spec.
 
 	products, err := s.productUseCase.GetProducts(ctx, params.Limit)
 	if err != nil {
+		s.logger.Infof("GET /products Error: %s", err.Error())
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -150,6 +153,7 @@ func (s Server) PostCategories(w http.ResponseWriter, r *http.Request) {
 			statusCode = http.StatusInternalServerError
 		}
 
+		s.logger.Warnf("POST /categories Error: %s", err.Error())
 		response.JSON(w, statusCode, spec.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -157,4 +161,19 @@ func (s Server) PostCategories(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.EmptyJSON(w, http.StatusOK)
+}
+
+func (s Server) GetCategories(w http.ResponseWriter, r *http.Request, params spec.GetCategoriesParams) {
+	ctx := r.Context()
+
+	categories, err := s.categoryUseCase.GetCategories(ctx, params.Main)
+	if err != nil {
+		s.logger.Warnf("GET /categories?main=%s Error: %s", *params.Main, err.Error())
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.JSON(w, http.StatusOK, categories)
 }
