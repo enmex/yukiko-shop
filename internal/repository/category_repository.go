@@ -22,13 +22,24 @@ func NewCategoryRepository(client *ent.Client, log *logrus.Logger) *CategoryRepo
 	}
 }
 
-func (repo *CategoryRepository) CreateCategory(ctx context.Context, category *domain.Category) (*ent.Category, error) {
+func (repo *CategoryRepository) CreateCategory(ctx context.Context, categoryDomain *domain.Category) (*ent.Category, error) {
 	qb := repo.Client.Category.
 		Create().
-		SetName(category.Name)
+		SetName(categoryDomain.Name)
 
-	if category.ParentCategory != nil {
-		qb = qb.SetParentCategory(category.ParentCategory.ID)
+	if categoryDomain.ParentCategory != nil {
+		parent, err := repo.Client.Category.
+			Query().
+			Where(category.NameEQ(categoryDomain.ParentCategory.Name)).
+			Only(ctx)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return nil, domain.CategoryNotFoundErr
+			}
+			return nil, err
+		}
+
+		qb = qb.SetParent(parent)
 	}
 
 	categoryEnt, err := qb.Save(ctx)
@@ -42,11 +53,15 @@ func (repo *CategoryRepository) CreateCategory(ctx context.Context, category *do
 	return categoryEnt, nil
 }
 
-func (repo *CategoryRepository) GetCategories(ctx context.Context, main *bool) ([]*ent.Category, error) {
+func (repo *CategoryRepository) GetCategories(ctx context.Context, main *bool, leaf *bool) ([]*ent.Category, error) {
 	qb := repo.Client.Category.Query()
 
 	if main != nil && *main {
 		qb = qb.Where(category.ParentCategoryIsNil())
+	}
+
+	if leaf != nil && *leaf {
+		qb = qb.Where(category.Not(category.HasChildren()))
 	}
 
 	categoriesEnt, err := qb.All(ctx)
@@ -55,4 +70,49 @@ func (repo *CategoryRepository) GetCategories(ctx context.Context, main *bool) (
 	}
 
 	return categoriesEnt, nil
+}
+
+func (repo *CategoryRepository) GetCategoryChildren(ctx context.Context, categoryDomain *domain.Category) ([]*ent.Category, error) {
+	categoriesEnt, err := repo.Client.Category.
+		Query().WithParent().
+		Where(category.HasParentWith(category.NameEQ(categoryDomain.Name))).
+		All(ctx)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return nil, domain.CategoryNotFoundErr
+		}
+
+		return nil, err
+	}
+
+	return categoriesEnt, nil
+}
+
+func (repo *CategoryRepository) GetCategoryByName(ctx context.Context, categoryName string) (*ent.Category, error) {
+	categoryEnt, err := repo.Client.Category.
+		Query().
+		WithParent().
+		WithChildren(
+			func(cq *ent.CategoryQuery) {
+				cq.WithParent()
+			},
+		).
+		WithProducts(
+			func(pq *ent.ProductQuery) {
+				pq.WithCategory(
+					func(cq *ent.CategoryQuery) {
+						cq.Select("name")
+					},
+				)
+			},
+		).
+		Where(category.NameEQ(categoryName)).
+		Only(ctx)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			return nil, domain.CategoryNotFoundErr
+		}
+		return nil, err
+	}
+	return categoryEnt, nil
 }

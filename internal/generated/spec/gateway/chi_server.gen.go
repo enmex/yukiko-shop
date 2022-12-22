@@ -29,6 +29,12 @@ type ServerInterface interface {
 	// Добавить новую категорию
 	// (POST /categories)
 	PostCategories(w http.ResponseWriter, r *http.Request)
+	// Получить список подкатегорий
+	// (GET /categories/children/{categoryName})
+	GetCategoriesChildrenCategoryName(w http.ResponseWriter, r *http.Request, categoryName CategoryName)
+	// Получить категорию
+	// (GET /categories/{categoryName})
+	GetCategoriesCategoryName(w http.ResponseWriter, r *http.Request, categoryName CategoryName)
 	// Получить список товаров
 	// (GET /products)
 	GetProducts(w http.ResponseWriter, r *http.Request, params GetProductsParams)
@@ -117,6 +123,17 @@ func (siw *ServerInterfaceWrapper) GetCategories(w http.ResponseWriter, r *http.
 		return
 	}
 
+	// ------------- Optional query parameter "leaf" -------------
+	if paramValue := r.URL.Query().Get("leaf"); paramValue != "" {
+
+	}
+
+	err = runtime.BindQueryParameter("form", true, false, "leaf", r.URL.Query(), &params.Leaf)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "leaf", Err: err})
+		return
+	}
+
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetCategories(w, r, params)
 	}
@@ -136,6 +153,58 @@ func (siw *ServerInterfaceWrapper) PostCategories(w http.ResponseWriter, r *http
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostCategories(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetCategoriesChildrenCategoryName operation middleware
+func (siw *ServerInterfaceWrapper) GetCategoriesChildrenCategoryName(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "categoryName" -------------
+	var categoryName CategoryName
+
+	err = runtime.BindStyledParameter("simple", false, "categoryName", chi.URLParam(r, "categoryName"), &categoryName)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "categoryName", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCategoriesChildrenCategoryName(w, r, categoryName)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetCategoriesCategoryName operation middleware
+func (siw *ServerInterfaceWrapper) GetCategoriesCategoryName(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "categoryName" -------------
+	var categoryName CategoryName
+
+	err = runtime.BindStyledParameter("simple", false, "categoryName", chi.URLParam(r, "categoryName"), &categoryName)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "categoryName", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCategoriesCategoryName(w, r, categoryName)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -374,6 +443,12 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/categories", wrapper.PostCategories)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/categories/children/{categoryName}", wrapper.GetCategoriesChildrenCategoryName)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/categories/{categoryName}", wrapper.GetCategoriesCategoryName)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/products", wrapper.GetProducts)

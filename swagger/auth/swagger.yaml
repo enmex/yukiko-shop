@@ -141,16 +141,23 @@ components:
         code: 
           type: integer
       
-    AuthResponse:
+    AuthResponse: 
       type: object
-      required:
-        - auth
-        - profile
+      required: 
+        - access
+        - refresh
+        - accessType
       properties:
-        auth:
-          $ref: "#/components/schemas/UserToken"
-        profile:
-          $ref: "#/components/schemas/User"
+        access:
+          $ref: "#/components/schemas/Token"
+        refresh:
+          $ref: "#/components/schemas/Token"
+        accessType: 
+          type: string
+          enum:
+            - ADMIN
+            - MANAGER
+            - CUSTOMER
 
     ErrorResponse:
       type: object

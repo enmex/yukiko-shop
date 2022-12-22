@@ -5,17 +5,17 @@ package spec
 
 // Category defines model for Category.
 type Category struct {
-	ChildrenCategories []Category `json:"childrenCategories"`
-	Id                 string     `json:"id"`
-	Name               string     `json:"name"`
-	ParentCategory     *Category  `json:"parentCategory,omitempty"`
-	Products           *[]Product `json:"products,omitempty"`
+	Children []Category `json:"children"`
+	Id       string     `json:"id"`
+	Name     string     `json:"name"`
+	Parent   *Category  `json:"parent,omitempty"`
+	Products []Product  `json:"products"`
 }
 
 // CreateCategoryRequest defines model for CreateCategoryRequest.
 type CreateCategoryRequest struct {
-	Name           string  `json:"name"`
-	ParentCategory *string `json:"parentCategory,omitempty"`
+	Name   string  `json:"name"`
+	Parent *string `json:"parent,omitempty"`
 }
 
 // CreateProductRequest defines model for CreateProductRequest.
@@ -47,6 +47,13 @@ type GetCategoriesResponse struct {
 	Categories []string `json:"categories"`
 }
 
+// GetCategoryResponse defines model for GetCategoryResponse.
+type GetCategoryResponse struct {
+	// Embedded struct due to allOf(#/components/schemas/Category)
+	Category `yaml:",inline"`
+	// Embedded fields due to inline allOf schema
+}
+
 // GetProductResponse defines model for GetProductResponse.
 type GetProductResponse struct {
 	CategoryName string  `json:"categoryName"`
@@ -62,6 +69,11 @@ type GetProductsResponse struct {
 	Products []Product `json:"products"`
 }
 
+// GetSubCategoriesResponse defines model for GetSubCategoriesResponse.
+type GetSubCategoriesResponse struct {
+	Categories []string `json:"categories"`
+}
+
 // Product defines model for Product.
 type Product struct {
 	CategoryName string  `json:"categoryName"`
@@ -72,12 +84,16 @@ type Product struct {
 	Price        float64 `json:"price"`
 }
 
+// CategoryName defines model for categoryName.
+type CategoryName string
+
 // ProductID defines model for productID.
 type ProductID string
 
 // GetCategoriesParams defines parameters for GetCategories.
 type GetCategoriesParams struct {
 	Main *bool `json:"main,omitempty"`
+	Leaf *bool `json:"leaf,omitempty"`
 }
 
 // PostCategoriesJSONBody defines parameters for PostCategories.

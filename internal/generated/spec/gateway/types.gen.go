@@ -7,25 +7,10 @@ const (
 	BearerAuthScopes = "bearerAuth.Scopes"
 )
 
-// AuthResponse defines model for AuthResponse.
-type AuthResponse struct {
-	Auth    UserToken `json:"auth"`
-	Profile User      `json:"profile"`
-}
-
-// Category defines model for Category.
-type Category struct {
-	ChildrenCategories *[]Category `json:"childrenCategories,omitempty"`
-	Id                 string      `json:"id"`
-	Name               string      `json:"name"`
-	ParentCategory     *Category   `json:"parentCategory,omitempty"`
-	Products           *[]Product  `json:"products,omitempty"`
-}
-
 // CreateCategoryRequest defines model for CreateCategoryRequest.
 type CreateCategoryRequest struct {
-	Name           string  `json:"name"`
-	ParentCategory *string `json:"parentCategory,omitempty"`
+	Name   string  `json:"name"`
+	Parent *string `json:"parent,omitempty"`
 }
 
 // CreateProductRequest defines model for CreateProductRequest.
@@ -37,44 +22,9 @@ type CreateProductRequest struct {
 	Price        float64 `json:"price"`
 }
 
-// CreateProductResponse defines model for CreateProductResponse.
-type CreateProductResponse struct {
-	CategoryName string  `json:"categoryName"`
-	Description  string  `json:"description"`
-	Id           string  `json:"id"`
-	Name         string  `json:"name"`
-	PhotoUrl     string  `json:"photoUrl"`
-	Price        float64 `json:"price"`
-}
-
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	Message string `json:"message"`
-}
-
-// GetProductResponse defines model for GetProductResponse.
-type GetProductResponse struct {
-	CategoryName string  `json:"categoryName"`
-	Description  string  `json:"description"`
-	Id           string  `json:"id"`
-	Name         string  `json:"name"`
-	PhotoUrl     string  `json:"photoUrl"`
-	Price        float64 `json:"price"`
-}
-
-// GetProductsResponse defines model for GetProductsResponse.
-type GetProductsResponse struct {
-	Products []Product `json:"products"`
-}
-
-// Product defines model for Product.
-type Product struct {
-	CategoryName string  `json:"categoryName"`
-	Description  string  `json:"description"`
-	Id           string  `json:"id"`
-	Name         string  `json:"name"`
-	PhotoUrl     string  `json:"photoUrl"`
-	Price        float64 `json:"price"`
 }
 
 // SendVerifyCodeRequest defines model for SendVerifyCodeRequest.
@@ -97,26 +47,8 @@ type SignUpRequest struct {
 	Password  string `json:"password"`
 }
 
-// Token defines model for Token.
-type Token struct {
-	ExpiresAt int64  `json:"expiresAt"`
-	Token     string `json:"token"`
-}
-
-// User defines model for User.
-type User struct {
-	Email     string `json:"email"`
-	FirstName string `json:"firstName"`
-	Id        string `json:"id"`
-	LastName  string `json:"lastName"`
-	Password  string `json:"password"`
-}
-
-// UserToken defines model for UserToken.
-type UserToken struct {
-	Access  Token `json:"access"`
-	Refresh Token `json:"refresh"`
-}
+// CategoryName defines model for categoryName.
+type CategoryName string
 
 // ProductID defines model for productID.
 type ProductID string
@@ -133,6 +65,7 @@ type PostAuthSignUpJSONBody SignUpRequest
 // GetCategoriesParams defines parameters for GetCategories.
 type GetCategoriesParams struct {
 	Main *bool `json:"main,omitempty"`
+	Leaf *bool `json:"leaf,omitempty"`
 }
 
 // PostCategoriesJSONBody defines parameters for PostCategories.

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	adapter "yukiko-shop/internal/adapter/user"
 	"yukiko-shop/internal/domain"
 	spec "yukiko-shop/internal/generated/spec/auth"
 	"yukiko-shop/internal/interfaces"
@@ -114,17 +113,15 @@ func (u *AuthUseCase) SignUp(ctx context.Context, user *domain.User, verifyCode 
 	}
 
 	return &spec.AuthResponse{
-		Auth: spec.UserToken{
-			Access: spec.Token{
-				Token:     jwtToken,
-				ExpiresAt: expiresAt.UnixMilli(),
-			},
-			Refresh: spec.Token{
-				Token:     jwtToken,
-				ExpiresAt: expiresAt.UnixMilli(),
-			},
+		Access: spec.Token{
+			Token:     jwtToken,
+			ExpiresAt: expiresAt.UnixMilli(),
 		},
-		Profile: *adapter.PresentUser(userEnt),
+		Refresh: spec.Token{
+			Token:     jwtToken,
+			ExpiresAt: expiresAt.UnixMilli(),
+		},
+		AccessType: spec.AuthResponseAccessType(string(userEnt.AccessType)),
 	}, nil
 }
 
@@ -160,16 +157,14 @@ func (u *AuthUseCase) SignIn(ctx context.Context, user *domain.User) (*spec.Auth
 	}
 
 	return &spec.AuthResponse{
-		Auth: spec.UserToken{
-			Access: spec.Token{
-				Token:     jwtToken,
-				ExpiresAt: expiresAt.UnixMilli(),
-			},
-			Refresh: spec.Token{
-				Token:     jwtToken,
-				ExpiresAt: expiresAt.UnixMilli(),
-			},
+		Access: spec.Token{
+			Token:     jwtToken,
+			ExpiresAt: expiresAt.UnixMilli(),
 		},
-		Profile: *adapter.PresentUser(userEnt),
+		Refresh: spec.Token{
+			Token:     jwtToken,
+			ExpiresAt: expiresAt.UnixMilli(),
+		},
+		AccessType: spec.AuthResponseAccessType(string(userEnt.AccessType)),
 	}, nil
 }

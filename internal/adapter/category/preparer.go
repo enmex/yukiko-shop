@@ -10,8 +10,10 @@ func PrepareCategory(categoryRequest *spec.CreateCategoryRequest) *domain.Catego
 		Name: categoryRequest.Name,
 	}
 
-	if categoryRequest.ParentCategory != nil {
-		category.ParentCategory.Name = *categoryRequest.ParentCategory
+	if categoryRequest.Parent != nil {
+		category.ParentCategory = &domain.Category{
+			Name: *categoryRequest.Parent,
+		}
 	}
 	return category
 }

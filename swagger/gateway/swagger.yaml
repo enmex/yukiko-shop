@@ -38,7 +38,7 @@ paths:
               $ref: "#/components/schemas/SignUpRequest"
       responses:
         201:
-          $ref: "#/components/responses/AuthResponse"
+          description: Всё хорошо
         400:
           $ref: "#/components/responses/ErrorResponse"
 
@@ -71,9 +71,41 @@ paths:
           name: main
           schema:
             type: boolean
+        - in: query
+          name: leaf
+          schema:
+            type: boolean
       responses:
         200: 
           description: Все хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /categories/children/{categoryName}:
+    get:
+      tags:
+        - Category
+      description: Получить список подкатегорий
+      summary: Получить список подкатегорий
+      parameters:
+        - $ref: "#/components/parameters/categoryName"
+      responses:
+        200: 
+          description: всё хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /categories/{categoryName}:
+    get:
+      tags:
+        - Category
+      description: Получить Категорию
+      summary: Получить категорию
+      parameters:
+        - $ref: "#/components/parameters/categoryName"
+      responses:
+        200: 
+          description: всё хорошо
         400:
           $ref: "#/components/responses/ErrorResponse"
 
@@ -93,7 +125,7 @@ paths:
               $ref: "#/components/schemas/CreateProductRequest"
       responses:
         201:
-          $ref: "#/components/responses/CreateProductResponse"
+          description: Всё хорошо
         400:
           $ref: "#/components/responses/ErrorResponse"
     get:
@@ -108,7 +140,7 @@ paths:
             type: integer
       responses:
         200:
-          $ref: "#/components/responses/GetProductsResponse"
+          description: Всё хорошо
         400:
           $ref: "#/components/responses/ErrorResponse"
 
@@ -122,7 +154,7 @@ paths:
         - $ref: "#/components/parameters/productID"
       responses:
         200:
-          $ref: "#/components/responses/GetProductResponse"
+          description: Всё хорошо
         400:
           $ref: "#/components/responses/ErrorResponse"
     delete:
@@ -154,101 +186,12 @@ paths:
               $ref: "#/components/schemas/SignInRequest"
       responses:
         201:
-          $ref: "#/components/responses/AuthResponse"
+          description: всё хорошо
         400:
           $ref: "#/components/responses/ErrorResponse"
 
 components:
   schemas:
-    User:
-      required:
-        - id
-        - email
-        - firstName
-        - lastName
-        - password
-      properties:
-        id:
-          type: string
-          format: uuid
-        email:
-          type: string
-        firstName:
-          type: string
-        lastName: 
-          type: string
-        password:
-          type: string
-
-    Token:
-      required:
-        - token
-        - expiresAt
-      properties:
-        token:
-          type: string
-        expiresAt:
-          type: integer
-          format: int64
-
-    UserToken:
-      required:
-        - access
-        - refresh
-      properties:
-        access:
-          $ref: "#/components/schemas/Token"
-        refresh:
-          $ref: "#/components/schemas/Token"
-
-    Category:
-      type: object
-      required: 
-        - id
-        - name
-      properties:
-        id:
-          type: string
-          format: uuid
-        parentCategory:
-            $ref: "#/components/schemas/Category"
-        name:
-          type: string
-          example: Аниме фигурки
-        childrenCategories:
-          type: array
-          items:
-            $ref: "#/components/schemas/Category"
-        products:
-          type: array
-          items:
-            $ref: "#/components/schemas/Product" 
-
-    Product:
-      type: object
-      required: 
-        - id
-        - name
-        - photoUrl
-        - description
-        - price
-        - categoryName
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        description:
-          type: string
-        photoUrl:
-          type: string
-        price:
-          type: number
-          format: double
-        categoryName:
-          type: string
-
     CreateProductRequest:
       type: object
       required: 
@@ -277,58 +220,7 @@ components:
       properties:
         name:
           type: string
-        parentCategory:
-          type: string
-          format: uuid
-
-    CreateProductResponse:
-      type: object
-      required:
-        - id
-        - name
-        - description
-        - photoUrl
-        - price
-        - categoryName
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        description:
-          type: string
-        photoUrl:
-          type: string
-        price:  
-          type: number
-          format: double
-        categoryName:
-          type: string
-
-    GetProductResponse:
-      type: object
-      required:
-        - id
-        - name
-        - description
-        - photoUrl
-        - price
-        - categoryName
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        description:
-          type: string
-        photoUrl:
-          type: string
-        price:  
-          type: number
-          format: double
-        categoryName:
+        parent:
           type: string
 
     SendVerifyCodeRequest:
@@ -348,16 +240,6 @@ components:
           type: string
         password:
           type: string
-
-    GetProductsResponse:
-      type: object
-      required:
-        - products
-      properties:
-        products:
-          type: array
-          items: 
-            $ref: "#/components/schemas/Product"
         
     SignUpRequest:
       type: object
@@ -378,18 +260,7 @@ components:
           type: string
         code:
           type: integer
-      
-    AuthResponse:
-      type: object
-      required:
-        - auth
-        - profile
-      properties:
-        auth:
-          $ref: "#/components/schemas/UserToken"
-        profile:
-          $ref: "#/components/schemas/User"
-
+  
     ErrorResponse:
       type: object
       required:
@@ -399,40 +270,12 @@ components:
           type: string
 
   responses:
-    AuthResponse:
-      description: Все хорошо
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/AuthResponse"
-
     ErrorResponse:
       description: Что-то не так
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
-
-    CreateProductResponse:
-      description: Ответ сервера на создание товара
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/CreateProductResponse"
-    
-    GetProductResponse:
-      description: Успешное получение информации о товаре
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/GetProductResponse"
-
-    GetProductsResponse:
-      description: Список товаров в каталоге
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/GetProductsResponse"
 
   parameters:
     productID:
@@ -442,3 +285,9 @@ components:
       schema:
         type: string
         format: uuid
+    categoryName:
+      name: categoryName
+      in: path
+      required: true
+      schema:
+        type: string

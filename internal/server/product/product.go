@@ -166,7 +166,7 @@ func (s Server) PostCategories(w http.ResponseWriter, r *http.Request) {
 func (s Server) GetCategories(w http.ResponseWriter, r *http.Request, params spec.GetCategoriesParams) {
 	ctx := r.Context()
 
-	categories, err := s.categoryUseCase.GetCategories(ctx, params.Main)
+	categories, err := s.categoryUseCase.GetCategories(ctx, params.Main, params.Leaf)
 	if err != nil {
 		s.logger.Warnf("GET /categories?main=%s Error: %s", *params.Main, err.Error())
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
@@ -176,4 +176,46 @@ func (s Server) GetCategories(w http.ResponseWriter, r *http.Request, params spe
 	}
 
 	response.JSON(w, http.StatusOK, categories)
+}
+
+func (s Server) GetCategoriesChildrenCategoryName(w http.ResponseWriter, r *http.Request, categoryName spec.CategoryName) {
+	ctx := r.Context()
+
+	categories, err := s.categoryUseCase.GetSubCategories(ctx, string(categoryName))
+	if err != nil {
+		s.logger.Warnf("GET /categories/children/%s Error: %s", categoryName, err.Error())
+		var statusCode int
+		if strings.EqualFold(err.Error(), domain.CategoryNotFoundErr.Error()) {
+			statusCode = http.StatusBadRequest
+		} else {
+			statusCode = http.StatusInternalServerError
+		}
+		response.JSON(w, statusCode, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.JSON(w, http.StatusOK, categories)
+}
+
+func (s Server) GetCategoriesCategoryName(w http.ResponseWriter, r *http.Request, categoryName spec.CategoryName) {
+	ctx := r.Context()
+
+	category, err := s.categoryUseCase.GetCategoryByName(ctx, string(categoryName))
+	if err != nil {
+		s.logger.Warnf("GET /categories/%s Error: %s", categoryName, err.Error())
+		var statusCode int
+		if strings.EqualFold(err.Error(), domain.CategoryNotFoundErr.Error()) {
+			statusCode = http.StatusBadRequest
+		} else {
+			statusCode = http.StatusInternalServerError
+		}
+		response.JSON(w, statusCode, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.JSON(w, http.StatusOK, category)
 }

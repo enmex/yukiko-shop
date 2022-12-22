@@ -22,5 +22,7 @@ type ProductRepository interface {
 
 type CategoryRepository interface {
 	CreateCategory(ctx context.Context, category *domain.Category) (*ent.Category, error)
-	GetCategories(ctx context.Context, main *bool) ([]*ent.Category, error)
+	GetCategories(ctx context.Context, main *bool, leaf *bool) ([]*ent.Category, error)
+	GetCategoryByName(ctx context.Context, name string) (*ent.Category, error)
+	GetCategoryChildren(ctx context.Context, category *domain.Category) ([]*ent.Category, error)
 }

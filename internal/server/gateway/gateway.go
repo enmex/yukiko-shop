@@ -156,11 +156,37 @@ func (s Server) GetCategories(w http.ResponseWriter, r *http.Request, params spe
 	var url string
 	if params.Main != nil {
 		url = fmt.Sprintf("http://%s/categories?main=%t", s.cfg.ProductServiceHost, *params.Main)
+	} else if params.Leaf != nil {
+		url = fmt.Sprintf("http://%s/categories?leaf=%t", s.cfg.ProductServiceHost, *params.Leaf)
 	} else {
 		url = fmt.Sprintf("http://%s/categories", s.cfg.ProductServiceHost)
 	}
 
 	res, err := httpRequest.Get(url)
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}
+
+func (s Server) GetCategoriesChildrenCategoryName(w http.ResponseWriter, r *http.Request, categoryName spec.CategoryName) {
+	res, err := httpRequest.Get(fmt.Sprintf("http://%s/categories/children/%s", s.cfg.ProductServiceHost, categoryName))
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}
+
+func (s Server) GetCategoriesCategoryName(w http.ResponseWriter, r *http.Request, categoryName spec.CategoryName) {
+	res, err := httpRequest.Get(fmt.Sprintf("http://%s/categories/%s", s.cfg.ProductServiceHost, categoryName))
 	if err != nil {
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
 			Message: err.Error(),
