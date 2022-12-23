@@ -27,6 +27,20 @@ func (cc *CategoryCreate) SetName(s string) *CategoryCreate {
 	return cc
 }
 
+// SetPhotoURL sets the "photo_url" field.
+func (cc *CategoryCreate) SetPhotoURL(s string) *CategoryCreate {
+	cc.mutation.SetPhotoURL(s)
+	return cc
+}
+
+// SetNillablePhotoURL sets the "photo_url" field if the given value is not nil.
+func (cc *CategoryCreate) SetNillablePhotoURL(s *string) *CategoryCreate {
+	if s != nil {
+		cc.SetPhotoURL(*s)
+	}
+	return cc
+}
+
 // SetParentCategory sets the "parent_category" field.
 func (cc *CategoryCreate) SetParentCategory(u uuid.UUID) *CategoryCreate {
 	cc.mutation.SetParentCategory(u)
@@ -229,6 +243,14 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 			Column: category.FieldName,
 		})
 		_node.Name = value
+	}
+	if value, ok := cc.mutation.PhotoURL(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: category.FieldPhotoURL,
+		})
+		_node.PhotoURL = value
 	}
 	if nodes := cc.mutation.ParentIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

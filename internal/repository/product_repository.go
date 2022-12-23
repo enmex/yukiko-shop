@@ -118,3 +118,15 @@ func (repo *ProductRepository) GetProducts(ctx context.Context, limit *int) ([]*
 
 	return productsEnt, nil
 }
+
+func (repo *ProductRepository) UpdateProductPhotoUrl(ctx context.Context, productID uuid.UUID, photoUrl string) (*ent.Product, error) {
+	productEnt, err := repo.Client.Product.
+		UpdateOneID(productID).
+		SetPhotoURL(photoUrl).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return productEnt, nil
+}

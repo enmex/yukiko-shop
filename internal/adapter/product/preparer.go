@@ -13,6 +13,6 @@ func PrepareProduct(productRequest *spec.CreateProductRequest) *domain.Product {
 		},
 		Description: productRequest.Description,
 		Price:       productRequest.Price,
-		PhotoURL:    &productRequest.Path,
+		PhotoURL:    &productRequest.PhotoUrl,
 	}
 }

@@ -35,6 +35,26 @@ func (cu *CategoryUpdate) SetName(s string) *CategoryUpdate {
 	return cu
 }
 
+// SetPhotoURL sets the "photo_url" field.
+func (cu *CategoryUpdate) SetPhotoURL(s string) *CategoryUpdate {
+	cu.mutation.SetPhotoURL(s)
+	return cu
+}
+
+// SetNillablePhotoURL sets the "photo_url" field if the given value is not nil.
+func (cu *CategoryUpdate) SetNillablePhotoURL(s *string) *CategoryUpdate {
+	if s != nil {
+		cu.SetPhotoURL(*s)
+	}
+	return cu
+}
+
+// ClearPhotoURL clears the value of the "photo_url" field.
+func (cu *CategoryUpdate) ClearPhotoURL() *CategoryUpdate {
+	cu.mutation.ClearPhotoURL()
+	return cu
+}
+
 // SetParentCategory sets the "parent_category" field.
 func (cu *CategoryUpdate) SetParentCategory(u uuid.UUID) *CategoryUpdate {
 	cu.mutation.SetParentCategory(u)
@@ -236,6 +256,19 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: category.FieldName,
 		})
 	}
+	if value, ok := cu.mutation.PhotoURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: category.FieldPhotoURL,
+		})
+	}
+	if cu.mutation.PhotoURLCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: category.FieldPhotoURL,
+		})
+	}
 	if cu.mutation.ParentCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -401,6 +434,26 @@ type CategoryUpdateOne struct {
 // SetName sets the "name" field.
 func (cuo *CategoryUpdateOne) SetName(s string) *CategoryUpdateOne {
 	cuo.mutation.SetName(s)
+	return cuo
+}
+
+// SetPhotoURL sets the "photo_url" field.
+func (cuo *CategoryUpdateOne) SetPhotoURL(s string) *CategoryUpdateOne {
+	cuo.mutation.SetPhotoURL(s)
+	return cuo
+}
+
+// SetNillablePhotoURL sets the "photo_url" field if the given value is not nil.
+func (cuo *CategoryUpdateOne) SetNillablePhotoURL(s *string) *CategoryUpdateOne {
+	if s != nil {
+		cuo.SetPhotoURL(*s)
+	}
+	return cuo
+}
+
+// ClearPhotoURL clears the value of the "photo_url" field.
+func (cuo *CategoryUpdateOne) ClearPhotoURL() *CategoryUpdateOne {
+	cuo.mutation.ClearPhotoURL()
 	return cuo
 }
 
@@ -627,6 +680,19 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 			Type:   field.TypeString,
 			Value:  value,
 			Column: category.FieldName,
+		})
+	}
+	if value, ok := cuo.mutation.PhotoURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: category.FieldPhotoURL,
+		})
+	}
+	if cuo.mutation.PhotoURLCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: category.FieldPhotoURL,
 		})
 	}
 	if cuo.mutation.ParentCleared() {

@@ -12,7 +12,7 @@ func PresentCategory(categoryEnt *ent.Category) *spec.Category {
 	if err == nil {
 		for _, childEnt := range childrenEnt {
 			children = append(children, spec.Category{
-				Id: childEnt.ID.String(),
+				Id:   childEnt.ID.String(),
 				Name: childEnt.Name,
 				Parent: &spec.Category{
 					Name: childEnt.Edges.Parent.Name,
@@ -38,10 +38,11 @@ func PresentCategory(categoryEnt *ent.Category) *spec.Category {
 	}
 
 	return &spec.Category{
-		Id: categoryEnt.ID.String(),
-		Name: categoryEnt.Name,
+		Id:       categoryEnt.ID.String(),
+		Name:     categoryEnt.Name,
+		PhotoUrl: &categoryEnt.PhotoURL,
 		Children: children,
-		Parent: parent,
+		Parent:   parent,
 		Products: products,
 	}
 }

@@ -18,6 +18,8 @@ type Category struct {
 	ID uuid.UUID `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// PhotoURL holds the value of the "photo_url" field.
+	PhotoURL string `json:"photo_url,omitempty"`
 	// ParentCategory holds the value of the "parent_category" field.
 	ParentCategory uuid.UUID `json:"parent_category,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -75,7 +77,7 @@ func (*Category) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case category.FieldName:
+		case category.FieldName, category.FieldPhotoURL:
 			values[i] = new(sql.NullString)
 		case category.FieldID, category.FieldParentCategory:
 			values[i] = new(uuid.UUID)
@@ -105,6 +107,12 @@ func (c *Category) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
 				c.Name = value.String
+			}
+		case category.FieldPhotoURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field photo_url", values[i])
+			} else if value.Valid {
+				c.PhotoURL = value.String
 			}
 		case category.FieldParentCategory:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -157,6 +165,8 @@ func (c *Category) String() string {
 	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
 	builder.WriteString(", name=")
 	builder.WriteString(c.Name)
+	builder.WriteString(", photo_url=")
+	builder.WriteString(c.PhotoURL)
 	builder.WriteString(", parent_category=")
 	builder.WriteString(fmt.Sprintf("%v", c.ParentCategory))
 	builder.WriteByte(')')

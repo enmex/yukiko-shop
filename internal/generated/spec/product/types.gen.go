@@ -9,13 +9,15 @@ type Category struct {
 	Id       string     `json:"id"`
 	Name     string     `json:"name"`
 	Parent   *Category  `json:"parent,omitempty"`
+	PhotoUrl *string    `json:"photoUrl,omitempty"`
 	Products []Product  `json:"products"`
 }
 
 // CreateCategoryRequest defines model for CreateCategoryRequest.
 type CreateCategoryRequest struct {
-	Name   string  `json:"name"`
-	Parent *string `json:"parent,omitempty"`
+	Name     string  `json:"name"`
+	Parent   *string `json:"parent,omitempty"`
+	PhotoUrl *string `json:"photoUrl,omitempty"`
 }
 
 // CreateProductRequest defines model for CreateProductRequest.
@@ -23,7 +25,7 @@ type CreateProductRequest struct {
 	CategoryName string  `json:"categoryName"`
 	Description  string  `json:"description"`
 	Name         string  `json:"name"`
-	Path         string  `json:"path"`
+	PhotoUrl     string  `json:"photoUrl"`
 	Price        float64 `json:"price"`
 }
 
@@ -44,7 +46,7 @@ type ErrorResponse struct {
 
 // GetCategoriesResponse defines model for GetCategoriesResponse.
 type GetCategoriesResponse struct {
-	Categories []string `json:"categories"`
+	Categories []Category `json:"categories"`
 }
 
 // GetCategoryResponse defines model for GetCategoryResponse.

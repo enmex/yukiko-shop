@@ -23,8 +23,8 @@ type ProductUseCase struct {
 
 func NewProductUseCase(
 	logger *logrus.Logger,
-	productRepository interfaces.ProductRepository,
 	minioClient *minio.MinioClient,
+	productRepository interfaces.ProductRepository,
 ) *ProductUseCase {
 	return &ProductUseCase{
 		logger:            logger,
@@ -40,7 +40,13 @@ func (u *ProductUseCase) CreateProduct(ctx context.Context, product *domain.Prod
 	}
 
 	if product.PhotoURL != nil {
-		if _, err := u.minioClient.UploadFile(ctx, fmt.Sprintf("product-%s", productEnt.ID), *product.PhotoURL, "jpg"); err != nil {
+		url, err := u.minioClient.UploadFile(ctx, fmt.Sprintf("product_%s.jpg", productEnt.ID), *product.PhotoURL, "jpg")
+		if err != nil {
+			return nil, err
+		}
+
+		productEnt, err = u.productRepository.UpdateProductPhotoUrl(ctx, productEnt.ID, *url)
+		if err != nil {
 			return nil, err
 		}
 	}

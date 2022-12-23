@@ -7,7 +7,8 @@ import (
 
 func PrepareCategory(categoryRequest *spec.CreateCategoryRequest) *domain.Category {
 	category := &domain.Category{
-		Name: categoryRequest.Name,
+		Name:     categoryRequest.Name,
+		PhotoURL: categoryRequest.PhotoUrl,
 	}
 
 	if categoryRequest.Parent != nil {

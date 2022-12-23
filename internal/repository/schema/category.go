@@ -17,6 +17,7 @@ func (Category) Fields() []ent.Field {
 	return []ent.Field{
 		field.UUID("id", uuid.UUID{}).Default(uuid.New).Unique(),
 		field.String("name").Unique(),
+		field.String("photo_url").Optional(),
 		field.UUID("parent_category", uuid.UUID{}).Optional(),
 	}
 }

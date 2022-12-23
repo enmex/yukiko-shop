@@ -13,6 +13,8 @@ const (
 	FieldID = "id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
+	// FieldPhotoURL holds the string denoting the photo_url field in the database.
+	FieldPhotoURL = "photo_url"
 	// FieldParentCategory holds the string denoting the parent_category field in the database.
 	FieldParentCategory = "parent_category"
 	// EdgeParent holds the string denoting the parent edge name in mutations.
@@ -44,6 +46,7 @@ const (
 var Columns = []string{
 	FieldID,
 	FieldName,
+	FieldPhotoURL,
 	FieldParentCategory,
 }
 

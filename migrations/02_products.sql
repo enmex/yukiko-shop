@@ -1,6 +1,7 @@
 CREATE TABLE categories (
     id uuid NOT NULL DEFAULT uuid_generate_v4() CONSTRAINT category_pk PRIMARY KEY,
     "name" TEXT NOT NULL,
+    photo_url TEXT NOT NULL DEFAULT 'https://vk.com/images/camera_c.gif',
     parent_category uuid REFERENCES categories(id) ON DELETE SET NULL
 );
 

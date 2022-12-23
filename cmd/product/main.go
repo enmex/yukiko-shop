@@ -63,13 +63,14 @@ func run(logger *logrus.Logger) error {
 	//productUseCase
 	productUseCase := usecase.NewProductUseCase(
 		logger,
-		productRepo,
 		minioClient,
+		productRepo,
 	)
 
 	//categoryUseCase
 	categoryUseCase := usecase.NewCategoryUseCase(
 		logger,
+		minioClient,
 		categoryRepo,
 	)
 

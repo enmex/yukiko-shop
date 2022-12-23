@@ -146,6 +146,8 @@ components:
         id:
           type: string
           format: uuid
+        photoUrl:
+          type: string
         parent:
             $ref: "#/components/schemas/Category"
         name:
@@ -189,7 +191,7 @@ components:
       required: 
         - name
         - description
-        - path
+        - photoUrl
         - price
         - categoryName
       properties:
@@ -197,7 +199,7 @@ components:
           type: string
         description:
           type: string
-        path:
+        photoUrl:
           type: string
         price:
           type: number
@@ -211,6 +213,8 @@ components:
         - name
       properties:
         name:
+          type: string
+        photoUrl:
           type: string
         parent:
           type: string
@@ -283,7 +287,7 @@ components:
         categories:
           type: array
           items:
-            type: string
+            $ref: "#/components/schemas/Category"
 
     GetSubCategoriesResponse:
       type: object

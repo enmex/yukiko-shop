@@ -39,6 +39,7 @@ type CategoryMutation struct {
 	typ             string
 	id              *uuid.UUID
 	name            *string
+	photo_url       *string
 	clearedFields   map[string]struct{}
 	parent          *uuid.UUID
 	clearedparent   bool
@@ -191,6 +192,55 @@ func (m *CategoryMutation) OldName(ctx context.Context) (v string, err error) {
 // ResetName resets all changes to the "name" field.
 func (m *CategoryMutation) ResetName() {
 	m.name = nil
+}
+
+// SetPhotoURL sets the "photo_url" field.
+func (m *CategoryMutation) SetPhotoURL(s string) {
+	m.photo_url = &s
+}
+
+// PhotoURL returns the value of the "photo_url" field in the mutation.
+func (m *CategoryMutation) PhotoURL() (r string, exists bool) {
+	v := m.photo_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPhotoURL returns the old "photo_url" field's value of the Category entity.
+// If the Category object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CategoryMutation) OldPhotoURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPhotoURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPhotoURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPhotoURL: %w", err)
+	}
+	return oldValue.PhotoURL, nil
+}
+
+// ClearPhotoURL clears the value of the "photo_url" field.
+func (m *CategoryMutation) ClearPhotoURL() {
+	m.photo_url = nil
+	m.clearedFields[category.FieldPhotoURL] = struct{}{}
+}
+
+// PhotoURLCleared returns if the "photo_url" field was cleared in this mutation.
+func (m *CategoryMutation) PhotoURLCleared() bool {
+	_, ok := m.clearedFields[category.FieldPhotoURL]
+	return ok
+}
+
+// ResetPhotoURL resets all changes to the "photo_url" field.
+func (m *CategoryMutation) ResetPhotoURL() {
+	m.photo_url = nil
+	delete(m.clearedFields, category.FieldPhotoURL)
 }
 
 // SetParentCategory sets the "parent_category" field.
@@ -408,9 +458,12 @@ func (m *CategoryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CategoryMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.name != nil {
 		fields = append(fields, category.FieldName)
+	}
+	if m.photo_url != nil {
+		fields = append(fields, category.FieldPhotoURL)
 	}
 	if m.parent != nil {
 		fields = append(fields, category.FieldParentCategory)
@@ -425,6 +478,8 @@ func (m *CategoryMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case category.FieldName:
 		return m.Name()
+	case category.FieldPhotoURL:
+		return m.PhotoURL()
 	case category.FieldParentCategory:
 		return m.ParentCategory()
 	}
@@ -438,6 +493,8 @@ func (m *CategoryMutation) OldField(ctx context.Context, name string) (ent.Value
 	switch name {
 	case category.FieldName:
 		return m.OldName(ctx)
+	case category.FieldPhotoURL:
+		return m.OldPhotoURL(ctx)
 	case category.FieldParentCategory:
 		return m.OldParentCategory(ctx)
 	}
@@ -455,6 +512,13 @@ func (m *CategoryMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
+		return nil
+	case category.FieldPhotoURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPhotoURL(v)
 		return nil
 	case category.FieldParentCategory:
 		v, ok := value.(uuid.UUID)
@@ -493,6 +557,9 @@ func (m *CategoryMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *CategoryMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(category.FieldPhotoURL) {
+		fields = append(fields, category.FieldPhotoURL)
+	}
 	if m.FieldCleared(category.FieldParentCategory) {
 		fields = append(fields, category.FieldParentCategory)
 	}
@@ -510,6 +577,9 @@ func (m *CategoryMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *CategoryMutation) ClearField(name string) error {
 	switch name {
+	case category.FieldPhotoURL:
+		m.ClearPhotoURL()
+		return nil
 	case category.FieldParentCategory:
 		m.ClearParentCategory()
 		return nil
@@ -523,6 +593,9 @@ func (m *CategoryMutation) ResetField(name string) error {
 	switch name {
 	case category.FieldName:
 		m.ResetName()
+		return nil
+	case category.FieldPhotoURL:
+		m.ResetPhotoURL()
 		return nil
 	case category.FieldParentCategory:
 		m.ResetParentCategory()

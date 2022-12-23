@@ -7,6 +7,7 @@ import (
 	"yukiko-shop/internal/repository/ent"
 	"yukiko-shop/internal/repository/ent/category"
 
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 )
 
@@ -110,5 +111,17 @@ func (repo *CategoryRepository) GetCategoryByName(ctx context.Context, categoryN
 		}
 		return nil, err
 	}
+	return categoryEnt, nil
+}
+
+func (repo *CategoryRepository) UpdateCategoryPhotoUrl(ctx context.Context, categoryID uuid.UUID, photoUrl string) (*ent.Category, error) {
+	categoryEnt, err := repo.Client.Category.
+		UpdateOneID(categoryID).
+		SetPhotoURL(photoUrl).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
+	
 	return categoryEnt, nil
 }

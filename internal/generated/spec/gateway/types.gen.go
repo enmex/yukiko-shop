@@ -9,8 +9,9 @@ const (
 
 // CreateCategoryRequest defines model for CreateCategoryRequest.
 type CreateCategoryRequest struct {
-	Name   string  `json:"name"`
-	Parent *string `json:"parent,omitempty"`
+	Name     string  `json:"name"`
+	Parent   *string `json:"parent,omitempty"`
+	PhotoUrl *string `json:"photoUrl,omitempty"`
 }
 
 // CreateProductRequest defines model for CreateProductRequest.

@@ -34,16 +34,28 @@ func NewClient(ctx context.Context, conf *Config) (*MinioClient, error) {
 	}, nil
 }
 
-func (mc MinioClient) UploadFile(ctx context.Context, objectName, objectPath, contentType string) (*minio.UploadInfo, error) {
-	info, err := mc.client.FPutObject(
+func (mc MinioClient) UploadFile(ctx context.Context, objectName, objectPath, objectType string) (*string, error) {
+	_, err := mc.client.FPutObject(
 		ctx,
 		mc.conf.BucketName,
 		objectName,
 		objectPath,
-		minio.PutObjectOptions{ContentType: contentType},
+		minio.PutObjectOptions{
+			ContentType: objectType,
+		},
 	)
+	if err != nil {
+		return nil, err
+	}
 
-	return &info, err
+	url, err := mc.client.PresignedGetObject(ctx, mc.conf.BucketName, objectName, mc.conf.UrlDuration, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	urlString := url.String()
+
+	return &urlString, err
 }
 
 func (mc MinioClient) DownloadFile(ctx context.Context, objectName string) (*minio.Object, error) {

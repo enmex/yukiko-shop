@@ -220,6 +220,8 @@ components:
       properties:
         name:
           type: string
+        photoUrl: 
+          type: string
         parent:
           type: string
 
