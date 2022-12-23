@@ -70,6 +70,11 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *domai
 func (repo *ProductRepository) GetProduct(ctx context.Context, productID uuid.UUID) (*ent.Product, error) {
 	productEnt, err := repo.Client.Product.
 		Query().
+		WithCategory(
+			func(cq *ent.CategoryQuery) {
+				cq.Select("name")
+			},
+		).
 		Where(product.IDEQ(productID)).
 		Only(ctx)
 

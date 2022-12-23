@@ -99,11 +99,7 @@ func (repo *CategoryRepository) GetCategoryByName(ctx context.Context, categoryN
 		).
 		WithProducts(
 			func(pq *ent.ProductQuery) {
-				pq.WithCategory(
-					func(cq *ent.CategoryQuery) {
-						cq.Select("name")
-					},
-				)
+				pq.WithCategory()
 			},
 		).
 		Where(category.NameEQ(categoryName)).
