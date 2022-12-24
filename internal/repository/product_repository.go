@@ -46,6 +46,7 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *domai
 
 	qb := repo.Client.Product.
 		Create().
+		SetID(product.ID).
 		SetName(product.Name).
 		SetDescription(product.Description).
 		SetCategory(categoryEnt).
@@ -129,4 +130,35 @@ func (repo *ProductRepository) UpdateProductPhotoUrl(ctx context.Context, produc
 	}
 
 	return productEnt, nil
+}
+
+func (repo *ProductRepository) UpdateProductsPhotoUrl(ctx context.Context, products []*domain.Product) error {
+	tx, err := repo.Client.Tx(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, product := range products {
+		_, err := tx.Product.
+			UpdateOneID(product.ID).
+			SetPhotoURL(*product.PhotoURL).
+			Save(ctx)
+		if err != nil {
+			return rollback(tx, err)
+		}
+	}
+
+	return tx.Commit()
+}
+
+func (repo *ProductRepository) GetProductsIds(ctx context.Context) ([]*ent.Product, error) {
+	productsEnt, err := repo.Client.Product.
+		Query().
+		Select("id").
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return productsEnt, nil
 }

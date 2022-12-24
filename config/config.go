@@ -5,15 +5,17 @@ import (
 	"yukiko-shop/pkg/db"
 	"yukiko-shop/pkg/mailer"
 	"yukiko-shop/pkg/minio"
+	"yukiko-shop/pkg/scheduler"
 )
 
 type Config struct {
-	DB     *db.Config
-	JWT    *auth.Config
-	HTTP   *ConfigHTTP
-	Mailer *mailer.Config
-	Redis  *ConfigRedis
-	Minio  *minio.Config
+	DB        *db.Config
+	JWT       *auth.Config
+	HTTP      *ConfigHTTP
+	Mailer    *mailer.Config
+	Redis     *ConfigRedis
+	Minio     *minio.Config
+	Scheduler *scheduler.Config
 }
 
 func NewConfig() (*Config, error) {
@@ -27,12 +29,18 @@ func NewConfig() (*Config, error) {
 		return nil, err
 	}
 
+	schedulerConf, err := NewConfigScheduler()
+	if err != nil {
+		return nil, err
+	}
+
 	return &Config{
-		DB:     NewDBConfig(),
-		JWT:    jwtConf,
-		HTTP:   NewConfigHTTP(),
-		Mailer: NewConfigMailer(),
-		Redis:  NewConfigRedis(),
-		Minio:  minioConf,
+		DB:        NewDBConfig(),
+		JWT:       jwtConf,
+		HTTP:      NewConfigHTTP(),
+		Mailer:    NewConfigMailer(),
+		Redis:     NewConfigRedis(),
+		Minio:     minioConf,
+		Scheduler: schedulerConf,
 	}, nil
 }

@@ -19,6 +19,8 @@ type ProductRepository interface {
 	GetProducts(ctx context.Context, limit *int) ([]*ent.Product, error)
 	DeleteProduct(ctx context.Context, productID uuid.UUID) error
 	UpdateProductPhotoUrl(ctx context.Context, productID uuid.UUID, photoUrl string) (*ent.Product, error)
+	UpdateProductsPhotoUrl(ctx context.Context, products []*domain.Product) error
+	GetProductsIds(ctx context.Context) ([]*ent.Product, error)
 }
 
 type CategoryRepository interface {
@@ -27,4 +29,6 @@ type CategoryRepository interface {
 	GetCategoryByName(ctx context.Context, name string) (*ent.Category, error)
 	GetCategoryChildren(ctx context.Context, category *domain.Category) ([]*ent.Category, error)
 	UpdateCategoryPhotoUrl(ctx context.Context, categoryID uuid.UUID, photoUrl string) (*ent.Category, error)
+	UpdateCategoriesPhotoUrl(ctx context.Context, categories []*domain.Category) error
+	GetCategoriesIds(ctx context.Context) ([]*ent.Category, error)
 }

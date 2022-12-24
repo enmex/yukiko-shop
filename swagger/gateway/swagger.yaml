@@ -190,6 +190,28 @@ paths:
         400:
           $ref: "#/components/responses/ErrorResponse"
 
+  /images:
+    post:
+      tags:
+        - Image
+      description: Загрузить фото
+      summary: Загрузить фото
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        201:
+          description: Всё хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
 components:
   schemas:
     CreateProductRequest:

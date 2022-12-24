@@ -3,6 +3,7 @@ package gateway
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	spec "yukiko-shop/internal/generated/spec/gateway"
 	httpRequest "yukiko-shop/pkg/request"
@@ -195,4 +196,28 @@ func (s Server) GetCategoriesCategoryName(w http.ResponseWriter, r *http.Request
 	}
 
 	response.Reply(w, res.Code, []byte(*res.Body))
+}
+
+func (s Server) PostImages(w http.ResponseWriter, r *http.Request) {
+	contentType := r.Header["Content-Type"]
+	res, err := http.Post(fmt.Sprintf("http://%s/images", s.cfg.ImageServiceHost), contentType[0], r.Body)
+	if err != nil {
+		s.logger.Warn(err)
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	defer res.Body.Close()
+	resData, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		s.logger.Warn(err)
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.StatusCode, resData)
 }

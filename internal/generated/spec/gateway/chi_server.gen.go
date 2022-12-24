@@ -35,6 +35,9 @@ type ServerInterface interface {
 	// Получить категорию
 	// (GET /categories/{categoryName})
 	GetCategoriesCategoryName(w http.ResponseWriter, r *http.Request, categoryName CategoryName)
+	// Загрузить фото
+	// (POST /images)
+	PostImages(w http.ResponseWriter, r *http.Request)
 	// Получить список товаров
 	// (GET /products)
 	GetProducts(w http.ResponseWriter, r *http.Request, params GetProductsParams)
@@ -205,6 +208,21 @@ func (siw *ServerInterfaceWrapper) GetCategoriesCategoryName(w http.ResponseWrit
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetCategoriesCategoryName(w, r, categoryName)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// PostImages operation middleware
+func (siw *ServerInterfaceWrapper) PostImages(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostImages(w, r)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -451,6 +469,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/categories/{categoryName}", wrapper.GetCategoriesCategoryName)
 	})
 	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/images", wrapper.PostImages)
+	})
+	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/products", wrapper.GetProducts)
 	})
 	r.Group(func(r chi.Router) {
@@ -465,4 +486,3 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 
 	return r
 }
-

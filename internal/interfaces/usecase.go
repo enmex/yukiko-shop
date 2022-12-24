@@ -2,8 +2,10 @@ package interfaces
 
 import (
 	"context"
+	"mime/multipart"
 	"yukiko-shop/internal/domain"
 	specAuth "yukiko-shop/internal/generated/spec/auth"
+	specImage "yukiko-shop/internal/generated/spec/image"
 	specProduct "yukiko-shop/internal/generated/spec/product"
 
 	"github.com/google/uuid"
@@ -27,4 +29,8 @@ type CategoryUseCase interface {
 	GetCategories(ctx context.Context, main *bool, leaf *bool) ([]*specProduct.Category, error)
 	GetCategoryByName(ctx context.Context, categoryName string) (*specProduct.Category, error)
 	GetSubCategories(ctx context.Context, categoryName string) ([]*specProduct.Category, error)
+}
+
+type ImageUseCase interface {
+	UploadImage(ctx context.Context, file multipart.File, fileHeader multipart.FileHeader) (*specImage.UploadImageResponse, error)
 }

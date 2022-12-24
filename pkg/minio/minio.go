@@ -2,6 +2,7 @@ package minio
 
 import (
 	"context"
+	"mime/multipart"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -24,8 +25,6 @@ func NewClient(ctx context.Context, conf *Config) (*MinioClient, error) {
 
 	location := "us-east-1"
 
-	clear(ctx, conf.BucketName, *minioClient)
-
 	minioClient.MakeBucket(ctx, conf.BucketName, minio.MakeBucketOptions{Region: location})
 
 	return &MinioClient{
@@ -34,12 +33,13 @@ func NewClient(ctx context.Context, conf *Config) (*MinioClient, error) {
 	}, nil
 }
 
-func (mc MinioClient) UploadFile(ctx context.Context, objectName, objectPath, objectType string) (*string, error) {
-	_, err := mc.client.FPutObject(
+func (mc MinioClient) UploadFile(ctx context.Context, objectName string, file multipart.File, fileHeader multipart.FileHeader, objectType string) (*string, error) {
+	_, err := mc.client.PutObject(
 		ctx,
 		mc.conf.BucketName,
 		objectName,
-		objectPath,
+		file,
+		fileHeader.Size,
 		minio.PutObjectOptions{
 			ContentType: objectType,
 		},
@@ -58,12 +58,6 @@ func (mc MinioClient) UploadFile(ctx context.Context, objectName, objectPath, ob
 	return &urlString, err
 }
 
-func (mc MinioClient) DownloadFile(ctx context.Context, objectName string) (*minio.Object, error) {
-	object, err := mc.client.GetObject(ctx, mc.conf.BucketName, objectName, minio.GetObjectOptions{})
-
-	return object, err
-}
-
 func (mc MinioClient) DeleteFile(ctx context.Context, objectName string) error {
 	err := mc.client.RemoveObject(ctx, mc.conf.BucketName, objectName, minio.RemoveObjectOptions{
 		ForceDelete: true,
@@ -71,11 +65,12 @@ func (mc MinioClient) DeleteFile(ctx context.Context, objectName string) error {
 	return err
 }
 
-func clear(ctx context.Context, bucketName string, client minio.Client) error {
-	err := <-client.RemoveObjects(ctx, bucketName, nil, minio.RemoveObjectsOptions{})
-	if err.Err != nil {
-		return err.Err
+func (mc MinioClient) GetObject(ctx context.Context, objectName string) (*string, error) {
+	url, err := mc.client.PresignedGetObject(ctx, mc.conf.BucketName, objectName, mc.conf.UrlDuration, nil)
+	if err != nil {
+		return nil, err
 	}
 
-	return client.RemoveBucket(ctx, bucketName)
+	urlString := url.String()
+	return &urlString, nil
 }

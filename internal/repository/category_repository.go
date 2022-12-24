@@ -26,6 +26,7 @@ func NewCategoryRepository(client *ent.Client, log *logrus.Logger) *CategoryRepo
 func (repo *CategoryRepository) CreateCategory(ctx context.Context, categoryDomain *domain.Category) (*ent.Category, error) {
 	qb := repo.Client.Category.
 		Create().
+		SetID(categoryDomain.ID).
 		SetName(categoryDomain.Name)
 
 	if categoryDomain.ParentCategory != nil {
@@ -122,6 +123,37 @@ func (repo *CategoryRepository) UpdateCategoryPhotoUrl(ctx context.Context, cate
 	if err != nil {
 		return nil, err
 	}
-	
+
 	return categoryEnt, nil
+}
+
+func (repo *CategoryRepository) UpdateCategoriesPhotoUrl(ctx context.Context, categories []*domain.Category) error {
+	tx, err := repo.Client.Tx(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, category := range categories {
+		_, err := tx.Category.
+			UpdateOneID(category.ID).
+			SetPhotoURL(*category.PhotoURL).
+			Save(ctx)
+		if err != nil {
+			return rollback(tx, err)
+		}
+	}
+
+	return tx.Commit()
+}
+
+func (repo *CategoryRepository) GetCategoriesIds(ctx context.Context) ([]*ent.Category, error) {
+	categoriesEnt, err := repo.Client.Category.
+		Query().
+		Select("id").
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return categoriesEnt, nil
 }

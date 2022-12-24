@@ -1,0 +1,68 @@
+openapi: 3.0.3
+info:
+  title: Image Service
+  description: Сервис загрузки фото
+  version: 0.0.1
+servers:
+  - description: Local server
+    url: http://localhost:8083/
+
+paths:  
+  /images:
+    post:
+      tags:
+        - Image
+      description: Загрузить фото
+      summary: Загрузить фото
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        201:
+          $ref: "#/components/responses/UploadImageResponse"
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
+components:
+  schemas:
+    UploadImageResponse:
+      type: object
+      required:
+        - id
+        - photoUrl
+      properties:
+        id: 
+          type: string
+          format: string
+        photoUrl:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+    
+  responses:
+    UploadImageResponse:
+      description: Всё ок
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UploadImageResponse"
+
+    ErrorResponse:
+      description: Что-то не так
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"

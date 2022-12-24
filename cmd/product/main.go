@@ -74,6 +74,18 @@ func run(logger *logrus.Logger) error {
 		categoryRepo,
 	)
 
+	productUseCase.StartScheduler(ctx, cfg.Scheduler)
+	categoryUseCase.StartScheduler(ctx, cfg.Scheduler)
+
+	go func() {
+		if err := productUseCase.ReadError(); err != nil {
+			logger.Fatalln(err)
+		}
+		if err := categoryUseCase.ReadError(); err != nil {
+			logger.Fatalln(err)
+		}
+	}()
+
 	// Server
 	srv := productServer.NewServer(
 		logger,

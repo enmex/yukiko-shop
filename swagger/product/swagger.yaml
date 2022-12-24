@@ -189,12 +189,15 @@ components:
     CreateProductRequest:
       type: object
       required: 
+        - id
         - name
         - description
         - photoUrl
         - price
         - categoryName
       properties:
+        id:
+          type: string
         name:
           type: string
         description:
@@ -210,8 +213,12 @@ components:
     CreateCategoryRequest:
       type: object
       required:
+        - id
         - name
       properties:
+        id: 
+          type: string
+          format: uuid
         name:
           type: string
         photoUrl:

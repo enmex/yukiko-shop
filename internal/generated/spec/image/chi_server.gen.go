@@ -12,15 +12,9 @@ import (
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
-	// Отправить код на почту
-	// (POST /auth/sendVerifyCode)
-	PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request)
-	// Авторизация пользователя
-	// (POST /auth/signIn)
-	PostAuthSignIn(w http.ResponseWriter, r *http.Request)
-	// Регистрация пользователя
-	// (POST /auth/signUp)
-	PostAuthSignUp(w http.ResponseWriter, r *http.Request)
+	// Загрузить фото
+	// (POST /images)
+	PostImages(w http.ResponseWriter, r *http.Request)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -32,42 +26,12 @@ type ServerInterfaceWrapper struct {
 
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
 
-// PostAuthSendVerifyCode operation middleware
-func (siw *ServerInterfaceWrapper) PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request) {
+// PostImages operation middleware
+func (siw *ServerInterfaceWrapper) PostImages(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostAuthSendVerifyCode(w, r)
-	}
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler(w, r.WithContext(ctx))
-}
-
-// PostAuthSignIn operation middleware
-func (siw *ServerInterfaceWrapper) PostAuthSignIn(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostAuthSignIn(w, r)
-	}
-
-	for _, middleware := range siw.HandlerMiddlewares {
-		handler = middleware(handler)
-	}
-
-	handler(w, r.WithContext(ctx))
-}
-
-// PostAuthSignUp operation middleware
-func (siw *ServerInterfaceWrapper) PostAuthSignUp(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	var handler = func(w http.ResponseWriter, r *http.Request) {
-		siw.Handler.PostAuthSignUp(w, r)
+		siw.Handler.PostImages(w, r)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -191,13 +155,7 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/auth/sendVerifyCode", wrapper.PostAuthSendVerifyCode)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/auth/signIn", wrapper.PostAuthSignIn)
-	})
-	r.Group(func(r chi.Router) {
-		r.Post(options.BaseURL+"/auth/signUp", wrapper.PostAuthSignUp)
+		r.Post(options.BaseURL+"/images", wrapper.PostImages)
 	})
 
 	return r

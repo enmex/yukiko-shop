@@ -2,7 +2,8 @@ version: '3.9'
 volumes:
   postgres_data:
   redis_data:
-  minio-storage:
+  share:
+    external: true
 
 services:
   yukiko_db:
@@ -65,6 +66,8 @@ services:
     build:
       context: .
       dockerfile: ./docker/product.dockerfile
+    volumes:  
+      - share:/share:consistent
     env_file:
       - .env
     ports:
@@ -74,6 +77,21 @@ services:
         ipv4_address: 171.4.4.13
         aliases:
           - yukiko.product.loc
+
+  images:
+    container_name: images
+    build:
+      context: .
+      dockerfile: ./docker/image.dockerfile
+    env_file:
+      - .env
+    ports:
+      - ${PHOTO_HTTP_PORT:-8083}:8083
+    networks:
+      app_network:
+        ipv4_address: 171.4.4.14
+        aliases:
+          - yukiko.image.loc
 
   api-gateway:
     container_name: api-gateway

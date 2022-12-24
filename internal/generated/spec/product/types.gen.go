@@ -15,6 +15,7 @@ type Category struct {
 
 // CreateCategoryRequest defines model for CreateCategoryRequest.
 type CreateCategoryRequest struct {
+	Id       string  `json:"id"`
 	Name     string  `json:"name"`
 	Parent   *string `json:"parent,omitempty"`
 	PhotoUrl *string `json:"photoUrl,omitempty"`
@@ -24,6 +25,7 @@ type CreateCategoryRequest struct {
 type CreateProductRequest struct {
 	CategoryName string  `json:"categoryName"`
 	Description  string  `json:"description"`
+	Id           string  `json:"id"`
 	Name         string  `json:"name"`
 	PhotoUrl     string  `json:"photoUrl"`
 	Price        float64 `json:"price"`
@@ -114,4 +116,3 @@ type PostCategoriesJSONRequestBody PostCategoriesJSONBody
 
 // PostProductsJSONRequestBody defines body for PostProducts for application/json ContentType.
 type PostProductsJSONRequestBody PostProductsJSONBody
-
