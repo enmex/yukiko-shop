@@ -31,16 +31,6 @@ type CreateProductRequest struct {
 	Price        float64 `json:"price"`
 }
 
-// CreateProductResponse defines model for CreateProductResponse.
-type CreateProductResponse struct {
-	CategoryName string  `json:"categoryName"`
-	Description  string  `json:"description"`
-	Id           string  `json:"id"`
-	Name         string  `json:"name"`
-	PhotoUrl     string  `json:"photoUrl"`
-	Price        float64 `json:"price"`
-}
-
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
 	Message string `json:"message"`
@@ -88,17 +78,19 @@ type Product struct {
 	Price        float64 `json:"price"`
 }
 
-// CategoryName defines model for categoryName.
-type CategoryName string
+// CategoryID defines model for categoryID.
+type CategoryID string
 
 // ProductID defines model for productID.
 type ProductID string
 
 // GetCategoriesParams defines parameters for GetCategories.
 type GetCategoriesParams struct {
-	Main *bool `json:"main,omitempty"`
-	Leaf *bool `json:"leaf,omitempty"`
+	Type *GetCategoriesParamsType `json:"type,omitempty"`
 }
+
+// GetCategoriesParamsType defines parameters for GetCategories.
+type GetCategoriesParamsType string
 
 // PostCategoriesJSONBody defines parameters for PostCategories.
 type PostCategoriesJSONBody CreateCategoryRequest
@@ -116,3 +108,4 @@ type PostCategoriesJSONRequestBody PostCategoriesJSONBody
 
 // PostProductsJSONRequestBody defines body for PostProducts for application/json ContentType.
 type PostProductsJSONRequestBody PostProductsJSONBody
+

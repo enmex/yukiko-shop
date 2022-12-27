@@ -46,3 +46,7 @@ func (u *ImageUseCase) UploadImage(ctx context.Context, file multipart.File, fil
 		PhotoUrl: *url,
 	}, nil
 }
+
+func (u *ImageUseCase) DeleteImage(ctx context.Context, imageID uuid.UUID) error {
+	return u.minioClient.DeleteFile(ctx, fmt.Sprintf("image_%s.jpg", imageID.String()))
+}

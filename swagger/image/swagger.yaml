@@ -29,6 +29,20 @@ paths:
           $ref: "#/components/responses/UploadImageResponse"
         400:
           $ref: "#/components/responses/ErrorResponse"
+  
+  /images/{imageID}:
+    delete:
+      tags: 
+       - Image
+      description: Загрузить фото
+      summary: Загрузить фото
+      parameters:
+        - $ref: "#/components/parameters/imageID"
+      responses:
+        204:
+          description: Все хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
 
 components:
   schemas:
@@ -66,3 +80,12 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+
+  parameters:
+    imageID:
+      name: imageID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid

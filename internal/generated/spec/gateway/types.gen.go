@@ -7,8 +7,18 @@ const (
 	BearerAuthScopes = "bearerAuth.Scopes"
 )
 
+// Defines values for GetAccessTypeResponseAccessType.
+const (
+	GetAccessTypeResponseAccessTypeADMIN GetAccessTypeResponseAccessType = "ADMIN"
+
+	GetAccessTypeResponseAccessTypeCUSTOMER GetAccessTypeResponseAccessType = "CUSTOMER"
+
+	GetAccessTypeResponseAccessTypeMANAGER GetAccessTypeResponseAccessType = "MANAGER"
+)
+
 // CreateCategoryRequest defines model for CreateCategoryRequest.
 type CreateCategoryRequest struct {
+	Id       string  `json:"id"`
 	Name     string  `json:"name"`
 	Parent   *string `json:"parent,omitempty"`
 	PhotoUrl *string `json:"photoUrl,omitempty"`
@@ -18,8 +28,9 @@ type CreateCategoryRequest struct {
 type CreateProductRequest struct {
 	CategoryName string  `json:"categoryName"`
 	Description  string  `json:"description"`
+	Id           string  `json:"id"`
 	Name         string  `json:"name"`
-	Path         string  `json:"path"`
+	PhotoUrl     *string `json:"photoUrl,omitempty"`
 	Price        float64 `json:"price"`
 }
 
@@ -27,6 +38,14 @@ type CreateProductRequest struct {
 type ErrorResponse struct {
 	Message string `json:"message"`
 }
+
+// GetAccessTypeResponse defines model for GetAccessTypeResponse.
+type GetAccessTypeResponse struct {
+	AccessType GetAccessTypeResponseAccessType `json:"accessType"`
+}
+
+// GetAccessTypeResponseAccessType defines model for GetAccessTypeResponse.AccessType.
+type GetAccessTypeResponseAccessType string
 
 // SendVerifyCodeRequest defines model for SendVerifyCodeRequest.
 type SendVerifyCodeRequest struct {
@@ -48,8 +67,11 @@ type SignUpRequest struct {
 	Password  string `json:"password"`
 }
 
-// CategoryName defines model for categoryName.
-type CategoryName string
+// CategoryID defines model for categoryID.
+type CategoryID string
+
+// ImageID defines model for imageID.
+type ImageID string
 
 // ProductID defines model for productID.
 type ProductID string
@@ -65,9 +87,11 @@ type PostAuthSignUpJSONBody SignUpRequest
 
 // GetCategoriesParams defines parameters for GetCategories.
 type GetCategoriesParams struct {
-	Main *bool `json:"main,omitempty"`
-	Leaf *bool `json:"leaf,omitempty"`
+	Type *GetCategoriesParamsType `json:"type,omitempty"`
 }
+
+// GetCategoriesParamsType defines parameters for GetCategories.
+type GetCategoriesParamsType string
 
 // PostCategoriesJSONBody defines parameters for PostCategories.
 type PostCategoriesJSONBody CreateCategoryRequest
@@ -94,3 +118,4 @@ type PostCategoriesJSONRequestBody PostCategoriesJSONBody
 
 // PostProductsJSONRequestBody defines body for PostProducts for application/json ContentType.
 type PostProductsJSONRequestBody PostProductsJSONBody
+

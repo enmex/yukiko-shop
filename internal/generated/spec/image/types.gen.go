@@ -13,3 +13,7 @@ type UploadImageResponse struct {
 	Id       string `json:"id"`
 	PhotoUrl string `json:"photoUrl"`
 }
+
+// ImageID defines model for imageID.
+type ImageID string
+

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	spec "yukiko-shop/internal/generated/spec/gateway"
+	"yukiko-shop/internal/middleware"
 	httpRequest "yukiko-shop/pkg/request"
 	"yukiko-shop/pkg/response"
 )
@@ -70,6 +71,28 @@ func (s Server) PostAuthSignIn(w http.ResponseWriter, r *http.Request) {
 	response.Reply(w, res.Code, []byte(*res.Body))
 }
 
+func (s Server) GetAuthAccess(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := middleware.GetUserIdFromContext(ctx)
+	
+	var url string
+	if userID == nil {
+		url = fmt.Sprintf("http://%s/auth/access", s.cfg.AuthServiceHost)
+	} else {
+		url = fmt.Sprintf("http://%s/auth/access?user=%s", s.cfg.AuthServiceHost, *userID)
+	}
+
+	res, err := httpRequest.Get(url)
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}
+
 func (s Server) PostProducts(w http.ResponseWriter, r *http.Request) {
 	var request spec.CreateProductRequest
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -91,7 +114,7 @@ func (s Server) PostProducts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) DeleteProductsProductID(w http.ResponseWriter, r *http.Request, productID spec.ProductID) {
-	res, err := httpRequest.Delete(fmt.Sprintf("http://%s/products/%s", s.cfg.ProductServiceHost, string(productID)))
+	_, err := httpRequest.Delete(fmt.Sprintf("http://%s/products/%s", s.cfg.ProductServiceHost, string(productID)))
 	if err != nil {
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
 			Message: err.Error(),
@@ -99,7 +122,14 @@ func (s Server) DeleteProductsProductID(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	response.Reply(w, res.Code, []byte(*res.Body))
+	if _, err := httpRequest.Delete(fmt.Sprintf("http://%s/images/%s", s.cfg.ImageServiceHost, string(productID))); err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.EmptyJSON(w, http.StatusNoContent)
 }
 
 func (s Server) GetProductsProductID(w http.ResponseWriter, r *http.Request, productID spec.ProductID) {
@@ -154,13 +184,9 @@ func (s Server) PostCategories(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) GetCategories(w http.ResponseWriter, r *http.Request, params spec.GetCategoriesParams) {
-	var url string
-	if params.Main != nil {
-		url = fmt.Sprintf("http://%s/categories?main=%t", s.cfg.ProductServiceHost, *params.Main)
-	} else if params.Leaf != nil {
-		url = fmt.Sprintf("http://%s/categories?leaf=%t", s.cfg.ProductServiceHost, *params.Leaf)
-	} else {
-		url = fmt.Sprintf("http://%s/categories", s.cfg.ProductServiceHost)
+	url := fmt.Sprintf("http://%s/categories", s.cfg.ProductServiceHost)
+	if params.Type != nil {
+		url += fmt.Sprintf("?type=%s", *params.Type)
 	}
 
 	res, err := httpRequest.Get(url)
@@ -174,8 +200,8 @@ func (s Server) GetCategories(w http.ResponseWriter, r *http.Request, params spe
 	response.Reply(w, res.Code, []byte(*res.Body))
 }
 
-func (s Server) GetCategoriesChildrenCategoryName(w http.ResponseWriter, r *http.Request, categoryName spec.CategoryName) {
-	res, err := httpRequest.Get(fmt.Sprintf("http://%s/categories/children/%s", s.cfg.ProductServiceHost, categoryName))
+func (s Server) GetCategoriesChildrenCategoryID(w http.ResponseWriter, r *http.Request, categoryID spec.CategoryID) {
+	res, err := httpRequest.Get(fmt.Sprintf("http://%s/categories/children/%s", s.cfg.ProductServiceHost, categoryID))
 	if err != nil {
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
 			Message: err.Error(),
@@ -186,8 +212,8 @@ func (s Server) GetCategoriesChildrenCategoryName(w http.ResponseWriter, r *http
 	response.Reply(w, res.Code, []byte(*res.Body))
 }
 
-func (s Server) GetCategoriesCategoryName(w http.ResponseWriter, r *http.Request, categoryName spec.CategoryName) {
-	res, err := httpRequest.Get(fmt.Sprintf("http://%s/categories/%s", s.cfg.ProductServiceHost, categoryName))
+func (s Server) GetCategoriesCategoryID(w http.ResponseWriter, r *http.Request, categoryID spec.CategoryID) {
+	res, err := httpRequest.Get(fmt.Sprintf("http://%s/categories/%s", s.cfg.ProductServiceHost, categoryID))
 	if err != nil {
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
 			Message: err.Error(),
@@ -220,4 +246,16 @@ func (s Server) PostImages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response.Reply(w, res.StatusCode, resData)
+}
+
+func (s Server) DeleteImagesImageID(w http.ResponseWriter, r *http.Request, imageID spec.ImageID) {
+	res, err := httpRequest.Delete(fmt.Sprintf("http://%s/%s", s.cfg.ImageServiceHost, imageID))
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
 }

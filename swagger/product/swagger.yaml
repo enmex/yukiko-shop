@@ -32,41 +32,40 @@ paths:
       summary: Получить список категорий
       parameters:
         - in: query
-          name: main
+          name: type
           schema:
-            type: boolean
-        - in: query
-          name: leaf
-          schema:
-            type: boolean
+            type: string
+            enum:
+              - root
+              - leaf
       responses:
         200: 
           $ref: "#/components/responses/GetCategoriesResponse"
         400:
           $ref: "#/components/responses/ErrorResponse"
 
-  /categories/children/{categoryName}:
+  /categories/children/{categoryID}:
     get:
       tags:
         - Category
       description: Получить список подкатегорий
       summary: Получить список подкатегорий
       parameters:
-        - $ref: "#/components/parameters/categoryName"
+        - $ref: "#/components/parameters/categoryID"
       responses:
         200: 
           $ref: "#/components/responses/GetSubCategoriesResponse"
         400:
           $ref: "#/components/responses/ErrorResponse"
 
-  /categories/{categoryName}:
+  /categories/{categoryID}:
     get:
       tags:
         - Category
       description: Получить список подкатегорий
       summary: Получить список подкатегорий
       parameters:
-        - $ref: "#/components/parameters/categoryName"
+        - $ref: "#/components/parameters/categoryID"
       responses:
         200: 
           $ref: "#/components/responses/GetCategoryResponse"
@@ -88,7 +87,7 @@ paths:
               $ref: "#/components/schemas/CreateProductRequest"
       responses:
         201:
-          $ref: "#/components/responses/CreateProductResponse"
+          description: Успешно
         400:
           $ref: "#/components/responses/ErrorResponse"
     get:
@@ -226,31 +225,6 @@ components:
         parent:
           type: string
 
-    CreateProductResponse:
-      type: object
-      required:
-        - id
-        - name
-        - description
-        - photoUrl
-        - price
-        - categoryName
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        description:
-          type: string
-        photoUrl:
-          type: string
-        price:  
-          type: number
-          format: double
-        categoryName:
-          type: string
-
     GetProductResponse:
       type: object
       required:
@@ -320,13 +294,6 @@ components:
           type: string
 
   responses:
-    CreateProductResponse:
-      description: Ответ сервера на создание товара
-      content:
-        application/json:
-          schema:
-            $ref: "#/components/schemas/CreateProductResponse"
-    
     GetProductResponse:
       description: Успешное получение информации о товаре
       content:
@@ -377,9 +344,10 @@ components:
       schema:
         type: string
         format: uuid
-    categoryName:
-      name: categoryName
+    categoryID:
+      name: categoryID
       in: path
       required: true
       schema:
         type: string
+        format: uuid

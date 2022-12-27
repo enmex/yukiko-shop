@@ -1,0 +1,96 @@
+openapi: 3.0.3
+info:
+  title: Shopping Cart Service 
+  description: Сервис корзины товаров
+  version: 0.0.1
+servers:
+  - description: Local server
+    url: http://localhost:8084/
+
+paths:
+  /cart:  
+    post:
+      tags:
+        - Shopping Cart
+      description: Добавление товара в корзину
+      summary: Добавление товара в корзину
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              - $ref: "#/components/schemas/AddProductToCartRequest"
+      responses:
+        201:
+          description: Все хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags:
+        - Shopping Cart
+      description: Очистка корзины
+      summary: Очистка корзины
+      responses:
+        204:
+          description: Все хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+              
+  /cart/{productID}:
+    post:
+      tags:
+        - Shopping Cart
+      description: Добавление товара в корзину
+      summary: Добавление товара в корзину
+      responses:
+        200:
+          description: Все хорошо
+    delete:
+      tags:
+        - Shopping Cart
+      description: Добавление товара в корзину
+      summary: Добавление товара в корзину
+      responses:
+        204:
+          description: Все хорошо
+
+components:
+  schemas:  
+    Product:
+      required:
+        - id
+        - name
+        - price
+        - quantity
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        price:
+          type: number
+          format: double
+        quantity:
+          type: integer
+  
+    AddProductToCartRequest:
+      allOf:
+        - type: object
+        - $ref: "#/components/schemas/Product"
+
+    ErrorResponse:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+
+  responses:
+    ErrorResponse:
+      description: Что-то не так
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"

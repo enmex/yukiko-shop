@@ -2,7 +2,9 @@ package minio
 
 import (
 	"context"
+	"fmt"
 	"mime/multipart"
+	"net/url"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -23,7 +25,7 @@ func NewClient(ctx context.Context, conf *Config) (*MinioClient, error) {
 		return nil, err
 	}
 
-	location := "us-east-1"
+	location := "ru-central1"
 
 	minioClient.MakeBucket(ctx, conf.BucketName, minio.MakeBucketOptions{Region: location})
 
@@ -48,13 +50,12 @@ func (mc MinioClient) UploadFile(ctx context.Context, objectName string, file mu
 		return nil, err
 	}
 
-	url, err := mc.client.PresignedGetObject(ctx, mc.conf.BucketName, objectName, mc.conf.UrlDuration, nil)
+	url, err := mc.client.PresignedGetObject(ctx, mc.conf.BucketName, objectName, mc.conf.UrlDuration, url.Values{})
 	if err != nil {
 		return nil, err
 	}
 
-	urlString := url.String()
-
+	urlString := fmt.Sprintf("%s://%s%s", url.Scheme, url.Host, url.Path)
 	return &urlString, err
 }
 
@@ -66,7 +67,7 @@ func (mc MinioClient) DeleteFile(ctx context.Context, objectName string) error {
 }
 
 func (mc MinioClient) GetObject(ctx context.Context, objectName string) (*string, error) {
-	url, err := mc.client.PresignedGetObject(ctx, mc.conf.BucketName, objectName, mc.conf.UrlDuration, nil)
+	url, err := mc.client.PresignedGetObject(ctx, mc.conf.BucketName, objectName, mc.conf.UrlDuration, url.Values{})
 	if err != nil {
 		return nil, err
 	}

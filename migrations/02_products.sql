@@ -14,7 +14,7 @@ CREATE TABLE products (
     price DOUBLE PRECISION NOT NULL,
     photo_url TEXT NOT NULL DEFAULT 'https://vk.com/images/camera_c.gif',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    category_id uuid NOT NULL REFERENCES categories(id) ON DELETE CASCADE
+    category_id uuid NOT NULL REFERENCES categories(id) ON DELETE SET NULL
 );
 
 CREATE UNIQUE INDEX product_name_idx ON products("name");

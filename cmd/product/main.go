@@ -11,7 +11,6 @@ import (
 	"yukiko-shop/pkg/db"
 	"yukiko-shop/pkg/http"
 	"yukiko-shop/pkg/logger"
-	"yukiko-shop/pkg/minio"
 
 	"github.com/sirupsen/logrus"
 )
@@ -54,37 +53,17 @@ func run(logger *logrus.Logger) error {
 	//repository of category
 	categoryRepo := repository.NewCategoryRepository(dbClient, logger)
 
-	//minio
-	minioClient, err := minio.NewClient(ctx, cfg.Minio)
-	if err != nil {
-		return err
-	}
-
 	//productUseCase
 	productUseCase := usecase.NewProductUseCase(
 		logger,
-		minioClient,
 		productRepo,
 	)
 
 	//categoryUseCase
 	categoryUseCase := usecase.NewCategoryUseCase(
 		logger,
-		minioClient,
 		categoryRepo,
 	)
-
-	productUseCase.StartScheduler(ctx, cfg.Scheduler)
-	categoryUseCase.StartScheduler(ctx, cfg.Scheduler)
-
-	go func() {
-		if err := productUseCase.ReadError(); err != nil {
-			logger.Fatalln(err)
-		}
-		if err := categoryUseCase.ReadError(); err != nil {
-			logger.Fatalln(err)
-		}
-	}()
 
 	// Server
 	srv := productServer.NewServer(

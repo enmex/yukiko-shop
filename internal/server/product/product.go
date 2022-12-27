@@ -27,7 +27,7 @@ func (s Server) PostProducts(w http.ResponseWriter, r *http.Request) {
 
 	product := productAdapter.PrepareProduct(&request)
 
-	productResponse, err := s.productUseCase.CreateProduct(ctx, product)
+	err := s.productUseCase.CreateProduct(ctx, product)
 	if err != nil {
 		var statusCode int
 		if strings.EqualFold(err.Error(), domain.ProductAlreadyExistsErr.Error()) || strings.EqualFold(err.Error(), domain.CategoryNotFoundErr.Error()) {
@@ -42,14 +42,7 @@ func (s Server) PostProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.JSON(w, http.StatusOK, spec.CreateProductResponse{
-		Id:           productResponse.Id,
-		Name:         productResponse.Name,
-		Description:  productResponse.Description,
-		PhotoUrl:     *productResponse.PhotoUrl,
-		Price:        productResponse.Price,
-		CategoryName: productResponse.CategoryName,
-	})
+	response.EmptyJSON(w, http.StatusCreated)
 }
 
 func (s Server) GetProductsProductID(w http.ResponseWriter, r *http.Request, productID spec.ProductID) {
@@ -144,7 +137,7 @@ func (s Server) PostCategories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := s.categoryUseCase.CreateCategory(ctx, categoryAdapter.PrepareCategory(&request))
+	err := s.categoryUseCase.CreateCategory(ctx, categoryAdapter.PrepareCategory(&request))
 	if err != nil {
 		var statusCode int
 		if strings.EqualFold(err.Error(), domain.CategoryAlreadyExistsErr.Error()) {
@@ -160,15 +153,15 @@ func (s Server) PostCategories(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response.EmptyJSON(w, http.StatusOK)
+	response.EmptyJSON(w, http.StatusCreated)
 }
 
 func (s Server) GetCategories(w http.ResponseWriter, r *http.Request, params spec.GetCategoriesParams) {
 	ctx := r.Context()
 
-	categories, err := s.categoryUseCase.GetCategories(ctx, params.Main, params.Leaf)
+	categories, err := s.categoryUseCase.GetCategories(ctx, params.Type)
 	if err != nil {
-		s.logger.Warnf("GET /categories?main=%s Error: %s", *params.Main, err.Error())
+		s.logger.Warnf("GET /categories?type=%s Error: %s", *params.Type, err.Error())
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
 			Message: err.Error(),
 		})
@@ -178,12 +171,13 @@ func (s Server) GetCategories(w http.ResponseWriter, r *http.Request, params spe
 	response.JSON(w, http.StatusOK, categories)
 }
 
-func (s Server) GetCategoriesChildrenCategoryName(w http.ResponseWriter, r *http.Request, categoryName spec.CategoryName) {
+func (s Server) GetCategoriesChildrenCategoryID(w http.ResponseWriter, r *http.Request, categoryID spec.CategoryID) {
 	ctx := r.Context()
+	id := uuid.MustParse(string(categoryID))
 
-	categories, err := s.categoryUseCase.GetSubCategories(ctx, string(categoryName))
+	categories, err := s.categoryUseCase.GetSubCategories(ctx, id)
 	if err != nil {
-		s.logger.Warnf("GET /categories/children/%s Error: %s", categoryName, err.Error())
+		s.logger.Warnf("GET /categories/children/%s Error: %s", categoryID, err.Error())
 		var statusCode int
 		if strings.EqualFold(err.Error(), domain.CategoryNotFoundErr.Error()) {
 			statusCode = http.StatusBadRequest
@@ -199,12 +193,13 @@ func (s Server) GetCategoriesChildrenCategoryName(w http.ResponseWriter, r *http
 	response.JSON(w, http.StatusOK, categories)
 }
 
-func (s Server) GetCategoriesCategoryName(w http.ResponseWriter, r *http.Request, categoryName spec.CategoryName) {
+func (s Server) GetCategoriesCategoryID(w http.ResponseWriter, r *http.Request, categoryID spec.CategoryID) {
 	ctx := r.Context()
+	id := uuid.MustParse(string(categoryID))
 
-	category, err := s.categoryUseCase.GetCategoryByName(ctx, string(categoryName))
+	category, err := s.categoryUseCase.GetCategoryByID(ctx, id)
 	if err != nil {
-		s.logger.Warnf("GET /categories/%s Error: %s", categoryName, err.Error())
+		s.logger.Warnf("GET /categories/%s Error: %s", categoryID, err.Error())
 		var statusCode int
 		if strings.EqualFold(err.Error(), domain.CategoryNotFoundErr.Error()) {
 			statusCode = http.StatusBadRequest

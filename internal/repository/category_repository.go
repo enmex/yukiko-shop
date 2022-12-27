@@ -29,6 +29,10 @@ func (repo *CategoryRepository) CreateCategory(ctx context.Context, categoryDoma
 		SetID(categoryDomain.ID).
 		SetName(categoryDomain.Name)
 
+	if categoryDomain.PhotoURL != nil {
+		qb = qb.SetPhotoURL(*categoryDomain.PhotoURL)
+	}
+
 	if categoryDomain.ParentCategory != nil {
 		parent, err := repo.Client.Category.
 			Query().
@@ -55,15 +59,15 @@ func (repo *CategoryRepository) CreateCategory(ctx context.Context, categoryDoma
 	return categoryEnt, nil
 }
 
-func (repo *CategoryRepository) GetCategories(ctx context.Context, main *bool, leaf *bool) ([]*ent.Category, error) {
+func (repo *CategoryRepository) GetCategories(ctx context.Context, categoryType *string) ([]*ent.Category, error) {
 	qb := repo.Client.Category.Query()
 
-	if main != nil && *main {
-		qb = qb.Where(category.ParentCategoryIsNil())
-	}
-
-	if leaf != nil && *leaf {
-		qb = qb.Where(category.Not(category.HasChildren()))
+	if categoryType != nil {
+		if strings.EqualFold(*categoryType, "root") {
+			qb = qb.Where(category.ParentCategoryIsNil())
+		} else if strings.EqualFold(*categoryType, "leaf") {
+			qb = qb.Where(category.Not(category.HasChildren()))
+		}
 	}
 
 	categoriesEnt, err := qb.All(ctx)
@@ -77,7 +81,7 @@ func (repo *CategoryRepository) GetCategories(ctx context.Context, main *bool, l
 func (repo *CategoryRepository) GetCategoryChildren(ctx context.Context, categoryDomain *domain.Category) ([]*ent.Category, error) {
 	categoriesEnt, err := repo.Client.Category.
 		Query().WithParent().
-		Where(category.HasParentWith(category.NameEQ(categoryDomain.Name))).
+		Where(category.ParentCategoryEQ(categoryDomain.ID)).
 		All(ctx)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
@@ -90,7 +94,7 @@ func (repo *CategoryRepository) GetCategoryChildren(ctx context.Context, categor
 	return categoriesEnt, nil
 }
 
-func (repo *CategoryRepository) GetCategoryByName(ctx context.Context, categoryName string) (*ent.Category, error) {
+func (repo *CategoryRepository) GetCategoryByID(ctx context.Context, categoryID uuid.UUID) (*ent.Category, error) {
 	categoryEnt, err := repo.Client.Category.
 		Query().
 		WithParent().
@@ -104,7 +108,7 @@ func (repo *CategoryRepository) GetCategoryByName(ctx context.Context, categoryN
 				pq.WithCategory()
 			},
 		).
-		Where(category.NameEQ(categoryName)).
+		Where(category.IDEQ(categoryID)).
 		Only(ctx)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {

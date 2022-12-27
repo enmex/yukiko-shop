@@ -57,8 +57,8 @@ func (u *AuthUseCase) SendVerifyCode(ctx context.Context, request spec.SendVerif
 	}
 
 	return u.mailer.SendMail(
-		"Code verification Yukiko shop",
-		fmt.Sprintf("Your verify code is %d", code),
+		"Код от магазинчика Yukiko shop",
+		fmt.Sprintf("А вот и ваше это самое: %d", code),
 		u.mailCfg.User,
 		request.Email,
 	)
@@ -121,7 +121,6 @@ func (u *AuthUseCase) SignUp(ctx context.Context, user *domain.User, verifyCode 
 			Token:     jwtToken,
 			ExpiresAt: expiresAt.UnixMilli(),
 		},
-		AccessType: spec.AuthResponseAccessType(string(userEnt.AccessType)),
 	}, nil
 }
 
@@ -165,6 +164,16 @@ func (u *AuthUseCase) SignIn(ctx context.Context, user *domain.User) (*spec.Auth
 			Token:     jwtToken,
 			ExpiresAt: expiresAt.UnixMilli(),
 		},
-		AccessType: spec.AuthResponseAccessType(string(userEnt.AccessType)),
+	}, nil
+}
+
+func (u *AuthUseCase) GetAccessType(ctx context.Context, user *domain.User) (*spec.GetAccessTypeResponse, error) {
+	accessType, err := u.userRepo.GetUserAccessType(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return &spec.GetAccessTypeResponse{
+		AccessType: spec.GetAccessTypeResponseAccessType(*accessType),
 	}, nil
 }

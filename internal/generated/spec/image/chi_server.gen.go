@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -15,6 +16,9 @@ type ServerInterface interface {
 	// Загрузить фото
 	// (POST /images)
 	PostImages(w http.ResponseWriter, r *http.Request)
+	// Загрузить фото
+	// (DELETE /images/{imageID})
+	DeleteImagesImageID(w http.ResponseWriter, r *http.Request, imageID ImageID)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -32,6 +36,32 @@ func (siw *ServerInterfaceWrapper) PostImages(w http.ResponseWriter, r *http.Req
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostImages(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// DeleteImagesImageID operation middleware
+func (siw *ServerInterfaceWrapper) DeleteImagesImageID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "imageID" -------------
+	var imageID ImageID
+
+	err = runtime.BindStyledParameter("simple", false, "imageID", chi.URLParam(r, "imageID"), &imageID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "imageID", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteImagesImageID(w, r, imageID)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -157,6 +187,10 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/images", wrapper.PostImages)
 	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/images/{imageID}", wrapper.DeleteImagesImageID)
+	})
 
 	return r
 }
+

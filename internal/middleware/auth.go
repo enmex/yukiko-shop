@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 	"yukiko-shop/pkg/auth"
@@ -16,39 +17,36 @@ func AuthMiddleware(authenticator auth.Authenticator, jwtAuth auth.JwtAuthentica
 		return func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 
-			accessRoles, err := authenticator.GetRequiredAccessRoles(r)
+			// Получаем список ролей, имеющих доступ к операции
+			requiredAccessRoles, err := authenticator.GetRequiredAccessRoles(r)
 			if err != nil {
 				response.JSON(w, http.StatusInternalServerError, Error{
 					Message: err.Error(),
 				})
 				return
 			}
-			if accessRoles == nil {
-				handler.ServeHTTP(w, r)
+
+			// Если ролей нет, то операция доступна всем
+			if requiredAccessRoles == nil {
+				accessClaims, _ := getAccessClaims(r, authenticator, jwtAuth)
+				if accessClaims == nil {
+					handler.ServeHTTP(w, r)
+				} else {
+					handler.ServeHTTP(w, r.WithContext(accessClaims.WithContext(ctx)))
+				}
 				return
 			}
 
-			jwt, err := authenticator.GetToken(r)
-			if err != nil || jwt == nil {
-				response.JSON(w, http.StatusUnauthorized, Error{
-					Message: "invalid security token",
-				})
-				return
-			}
-
-			// Получаем данные пользователя из токена
-			var accessClaims *auth.AccessClaims
-			cleanToken := auth.GetBearer(*jwt)
-			accessClaims, err = jwtAuth.ParseAccessToken(cleanToken)
+			accessClaims, err := getAccessClaims(r, authenticator, jwtAuth)
 			if err != nil {
 				response.JSON(w, http.StatusUnauthorized, Error{
-					Message: "invalid security token",
+					Message: "no access",
 				})
 				return
 			}
 
 			//Проверяем, что у пользователя есть доступ к операции
-			if !slices.Contains(accessRoles, accessClaims.AccessType) {
+			if !slices.Contains(requiredAccessRoles, accessClaims.AccessType) {
 				response.JSON(w, http.StatusForbidden, Error{
 					Message: "no access",
 				})
@@ -80,4 +78,20 @@ func GetUserIdFromContext(ctx context.Context) *uuid.UUID {
 	}
 
 	return &claims.UserID
+}
+
+func getAccessClaims(r *http.Request, authenticator auth.Authenticator, jwtAuth auth.JwtAuthenticator) (*auth.AccessClaims, error) {
+	jwt, err := authenticator.GetToken(r)
+	if err != nil || jwt == nil {
+		return nil, errors.New("invalid security token")
+	}
+
+	var accessClaims *auth.AccessClaims
+	cleanToken := auth.GetBearer(*jwt)
+	accessClaims, err = jwtAuth.ParseAccessToken(cleanToken)
+	if err != nil {
+		return nil, errors.New("invalid security token")
+	}
+
+	return accessClaims, nil
 }

@@ -60,6 +60,24 @@ paths:
         400:
           $ref: "#/components/responses/ErrorResponse"
 
+  /auth/access: 
+    get:
+      tags: 
+        - User
+      summary: Авторизация пользователя
+      description: Авторизирует пользователя в системе
+      parameters:
+        - in: query
+          name: user
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          $ref: "#/components/responses/GetAccessTypeResponse"
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
 components:
   schemas:
     User:
@@ -152,7 +170,13 @@ components:
           $ref: "#/components/schemas/Token"
         refresh:
           $ref: "#/components/schemas/Token"
-        accessType: 
+
+    GetAccessTypeResponse:
+      type: object
+      required:
+        - accessType
+      properties:
+        accessType:
           type: string
           enum:
             - ADMIN
@@ -174,6 +198,13 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/AuthResponse"
+
+    GetAccessTypeResponse:
+      description: Все хорошо
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GetAccessTypeResponse"
 
     ErrorResponse:
       description: Что-то не так

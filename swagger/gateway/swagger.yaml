@@ -42,6 +42,18 @@ paths:
         400:
           $ref: "#/components/responses/ErrorResponse"
 
+  /auth/access: 
+    get:
+      tags: 
+        - User
+      summary: Авторизация пользователя
+      description: Авторизирует пользователя в системе
+      responses:
+        200:
+          $ref: "#/components/responses/GetAccessTypeResponse"
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
   /categories:
     post:
       tags:
@@ -68,41 +80,40 @@ paths:
       summary: Получить список категорий
       parameters:
         - in: query
-          name: main
+          name: type
           schema:
-            type: boolean
-        - in: query
-          name: leaf
-          schema:
-            type: boolean
+            type: string
+            enum:
+              - root
+              - leaf
       responses:
         200: 
           description: Все хорошо
         400:
           $ref: "#/components/responses/ErrorResponse"
 
-  /categories/children/{categoryName}:
+  /categories/children/{categoryID}:
     get:
       tags:
         - Category
       description: Получить список подкатегорий
       summary: Получить список подкатегорий
       parameters:
-        - $ref: "#/components/parameters/categoryName"
+        - $ref: "#/components/parameters/categoryID"
       responses:
         200: 
           description: всё хорошо
         400:
           $ref: "#/components/responses/ErrorResponse"
 
-  /categories/{categoryName}:
+  /categories/{categoryID}:
     get:
       tags:
         - Category
       description: Получить Категорию
       summary: Получить категорию
       parameters:
-        - $ref: "#/components/parameters/categoryName"
+        - $ref: "#/components/parameters/categoryID"
       responses:
         200: 
           description: всё хорошо
@@ -196,6 +207,8 @@ paths:
         - Image
       description: Загрузить фото
       summary: Загрузить фото
+      security:
+        - bearerAuth: [ "ADMIN", "MANAGER" ]
       requestBody:
         required: true
         content:
@@ -212,22 +225,39 @@ paths:
         400:
           $ref: "#/components/responses/ErrorResponse"
 
+  /images/{imageID}:
+    delete:
+      tags: 
+       - Image
+      description: Загрузить фото
+      summary: Загрузить фото
+      parameters:
+        - $ref: "#/components/parameters/imageID"
+      responses:
+        204:
+          description: Все хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
 components:
   schemas:
     CreateProductRequest:
       type: object
       required: 
+        - id
         - name
         - description
-        - path
         - price
         - categoryName
       properties:
+        id:
+          type: string
+          format: uuid
         name:
           type: string
         description:
           type: string
-        path:
+        photoUrl:
           type: string
         price:
           type: number
@@ -238,8 +268,12 @@ components:
     CreateCategoryRequest:
       type: object
       required:
+        - id
         - name
       properties:
+        id: 
+          type: string
+          format: uuid
         name:
           type: string
         photoUrl: 
@@ -284,7 +318,19 @@ components:
           type: string
         code:
           type: integer
-  
+
+    GetAccessTypeResponse:
+      type: object
+      required:
+        - accessType
+      properties:
+        accessType:
+          type: string
+          enum:
+            - ADMIN
+            - MANAGER
+            - CUSTOMER
+
     ErrorResponse:
       type: object
       required:
@@ -294,6 +340,13 @@ components:
           type: string
 
   responses:
+    GetAccessTypeResponse:
+      description: Все хорошо
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GetAccessTypeResponse"
+
     ErrorResponse:
       description: Что-то не так
       content:
@@ -309,9 +362,17 @@ components:
       schema:
         type: string
         format: uuid
-    categoryName:
-      name: categoryName
+    categoryID:
+      name: categoryID
       in: path
       required: true
       schema:
         type: string
+        format: uuid
+    imageID:
+      name: imageID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid

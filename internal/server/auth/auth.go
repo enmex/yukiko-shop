@@ -8,6 +8,8 @@ import (
 	"yukiko-shop/internal/domain"
 	spec "yukiko-shop/internal/generated/spec/auth"
 	"yukiko-shop/pkg/response"
+
+	"github.com/google/uuid"
 )
 
 func (s Server) PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request) {
@@ -87,6 +89,30 @@ func (s Server) PostAuthSignUp(w http.ResponseWriter, r *http.Request) {
 		}
 		s.logger.Infof("/auth/signUp Error: %s", err.Error())
 		response.JSON(w, statusCode, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.JSON(w, http.StatusOK, res)
+}
+
+func (s Server) GetAuthAccess(w http.ResponseWriter, r *http.Request, params spec.GetAuthAccessParams) {
+	ctx := r.Context()
+	if params.User == nil {
+		response.JSON(w, http.StatusOK, spec.GetAccessTypeResponse{
+			AccessType: spec.GetAccessTypeResponseAccessTypeCUSTOMER,
+		})
+		return
+	}
+
+	userID := uuid.MustParse(*params.User)
+
+	res, err := s.authUseCase.GetAccessType(ctx, &domain.User{
+		ID: userID,
+	})
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
 			Message: err.Error(),
 		})
 		return

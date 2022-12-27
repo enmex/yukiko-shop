@@ -7,11 +7,15 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/go-chi/chi/v5"
 )
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
+	// Авторизация пользователя
+	// (GET /auth/access)
+	GetAuthAccess(w http.ResponseWriter, r *http.Request, params GetAuthAccessParams)
 	// Отправить код на почту
 	// (POST /auth/sendVerifyCode)
 	PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request)
@@ -31,6 +35,37 @@ type ServerInterfaceWrapper struct {
 }
 
 type MiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
+
+// GetAuthAccess operation middleware
+func (siw *ServerInterfaceWrapper) GetAuthAccess(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetAuthAccessParams
+
+	// ------------- Optional query parameter "user" -------------
+	if paramValue := r.URL.Query().Get("user"); paramValue != "" {
+
+	}
+
+	err = runtime.BindQueryParameter("form", true, false, "user", r.URL.Query(), &params.User)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetAuthAccess(w, r, params)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
 
 // PostAuthSendVerifyCode operation middleware
 func (siw *ServerInterfaceWrapper) PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request) {
@@ -191,6 +226,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	}
 
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/auth/access", wrapper.GetAuthAccess)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/auth/sendVerifyCode", wrapper.PostAuthSendVerifyCode)
 	})
 	r.Group(func(r chi.Router) {
@@ -202,3 +240,4 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 
 	return r
 }
+

@@ -57,3 +57,18 @@ func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (*
 
 	return userEnt, nil
 }
+
+func (repo *UserRepository) GetUserAccessType(ctx context.Context, userDomain *domain.User) (*string, error) {
+	userEnt, err := repo.Client.User.
+		Query().
+		Select("access_type").
+		Where(user.IDEQ(userDomain.ID)).
+		Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	accessType := string(userEnt.AccessType)
+
+	return &accessType, nil
+}
