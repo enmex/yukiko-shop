@@ -201,6 +201,18 @@ paths:
         400:
           $ref: "#/components/responses/ErrorResponse"
 
+  /auth/refreshToken:
+    get:
+      tags:
+        - User
+      summary: Обновление токена
+      description: Обновление токена
+      responses:
+        200:
+          description: все хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
   /images:
     post:
       tags:
@@ -238,6 +250,72 @@ paths:
           description: Все хорошо
         400:
           $ref: "#/components/responses/ErrorResponse"
+
+  /cart:  
+    post:
+      tags:
+        - Shopping Cart
+      description: Добавление товара в корзину
+      summary: Добавление товара в корзину
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddProductToCartRequest"
+      responses:
+        201:
+          description: Все хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+    delete:
+      tags:
+        - Shopping Cart
+      description: Очистка корзины
+      summary: Очистка корзины
+      responses:
+        204:
+          description: Все хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+    get:
+      tags:
+        - Shopping Cart
+      description: Получение корзины
+      summary: Получение корзины
+      responses:
+        200:
+          description: Все хорошо
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /cart/{productID}:
+    patch:
+      tags:
+        - Shopping Cart
+      description: Обновление количества товара в корзине
+      summary: Обновление количества товара в корзине
+      parameters:
+        - $ref: "#/components/parameters/productID"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCartProductRequest"
+      responses:
+        200:
+          description: Все хорошо
+    delete:
+      tags:
+        - Shopping Cart
+      description: Добавление товара в корзину
+      summary: Добавление товара в корзину
+      parameters:
+        - $ref: "#/components/parameters/productID"
+      responses:
+        204:
+          description: Все хорошо
 
 components:
   schemas:
@@ -330,6 +408,33 @@ components:
             - ADMIN
             - MANAGER
             - CUSTOMER
+
+    AddProductToCartRequest:
+      type: object
+      required:
+        - name
+        - productID
+        - photoUrl
+        - price
+      properties:
+        name:
+          type: string
+        productID:
+          type: string
+          format: uuid
+        price:
+          type: number
+          format: double
+        photoUrl:
+          type: string
+
+    UpdateCartProductRequest:
+      type: object
+      required:
+        - quantity
+      properties:
+        quantity:
+          type: integer
 
     ErrorResponse:
       type: object

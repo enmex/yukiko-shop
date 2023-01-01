@@ -15,6 +15,9 @@ gen_server:
 	go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.9.0 -package spec -generate spec ./swagger/image/swagger.yaml > ./internal/generated/spec/image/spec.gen.go
 	go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.9.0 -package spec -generate chi-server ./swagger/image/swagger.yaml > ./internal/generated/spec/image/chi_server.gen.go
 
+	go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.9.0 -package spec -generate types ./swagger/cart/swagger.yaml > ./internal/generated/spec/cart/types.gen.go
+	go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.9.0 -package spec -generate spec ./swagger/cart/swagger.yaml > ./internal/generated/spec/cart/spec.gen.go
+	go run github.com/deepmap/oapi-codegen/cmd/oapi-codegen@v1.9.0 -package spec -generate chi-server ./swagger/cart/swagger.yaml > ./internal/generated/spec/cart/chi_server.gen.go
 
 	go mod tidy
 

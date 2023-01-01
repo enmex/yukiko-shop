@@ -62,6 +62,11 @@ type GetAuthAccessParams struct {
 	User *string `json:"user,omitempty"`
 }
 
+// GetAuthRefreshTokenParams defines parameters for GetAuthRefreshToken.
+type GetAuthRefreshTokenParams struct {
+	User *string `json:"user,omitempty"`
+}
+
 // PostAuthSendVerifyCodeJSONBody defines parameters for PostAuthSendVerifyCode.
 type PostAuthSendVerifyCodeJSONBody SendVerifyCodeRequest
 

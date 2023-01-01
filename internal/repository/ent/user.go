@@ -26,6 +26,27 @@ type User struct {
 	AccessType user.AccessType `json:"access_type,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `json:"password,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the UserQuery when eager-loading is set.
+	Edges UserEdges `json:"edges"`
+}
+
+// UserEdges holds the relations/edges for other nodes in the graph.
+type UserEdges struct {
+	// ProductsInCart holds the value of the products_in_cart edge.
+	ProductsInCart []*CartProduct `json:"products_in_cart,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// ProductsInCartOrErr returns the ProductsInCart value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) ProductsInCartOrErr() ([]*CartProduct, error) {
+	if e.loadedTypes[0] {
+		return e.ProductsInCart, nil
+	}
+	return nil, &NotLoadedError{edge: "products_in_cart"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -91,6 +112,11 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 		}
 	}
 	return nil
+}
+
+// QueryProductsInCart queries the "products_in_cart" edge of the User entity.
+func (u *User) QueryProductsInCart() *CartProductQuery {
+	return (&UserClient{config: u.config}).QueryProductsInCart(u)
 }
 
 // Update returns a builder for updating this User.

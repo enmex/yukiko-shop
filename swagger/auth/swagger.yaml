@@ -78,6 +78,24 @@ paths:
         400:
           $ref: "#/components/responses/ErrorResponse"
 
+  /auth/refreshToken:
+    get:
+      tags:
+        - User
+      summary: Обновление токена
+      description: Обновление токена
+      parameters:
+        - in: query
+          name: user
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          $ref: "#/components/responses/AuthResponse"
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
 components:
   schemas:
     User:

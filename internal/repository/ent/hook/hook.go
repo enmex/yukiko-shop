@@ -8,6 +8,19 @@ import (
 	"yukiko-shop/internal/repository/ent"
 )
 
+// The CartProductFunc type is an adapter to allow the use of ordinary
+// function as CartProduct mutator.
+type CartProductFunc func(context.Context, *ent.CartProductMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CartProductFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.CartProductMutation)
+	if !ok {
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CartProductMutation", m)
+	}
+	return f(ctx, mv)
+}
+
 // The CategoryFunc type is an adapter to allow the use of ordinary
 // function as Category mutator.
 type CategoryFunc func(context.Context, *ent.CategoryMutation) (ent.Value, error)

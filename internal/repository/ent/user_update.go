@@ -6,12 +6,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"yukiko-shop/internal/repository/ent/cartproduct"
 	"yukiko-shop/internal/repository/ent/predicate"
 	"yukiko-shop/internal/repository/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // UserUpdate is the builder for updating User entities.
@@ -65,9 +67,45 @@ func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
 	return uu
 }
 
+// AddProductsInCartIDs adds the "products_in_cart" edge to the CartProduct entity by IDs.
+func (uu *UserUpdate) AddProductsInCartIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.AddProductsInCartIDs(ids...)
+	return uu
+}
+
+// AddProductsInCart adds the "products_in_cart" edges to the CartProduct entity.
+func (uu *UserUpdate) AddProductsInCart(c ...*CartProduct) *UserUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uu.AddProductsInCartIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
+}
+
+// ClearProductsInCart clears all "products_in_cart" edges to the CartProduct entity.
+func (uu *UserUpdate) ClearProductsInCart() *UserUpdate {
+	uu.mutation.ClearProductsInCart()
+	return uu
+}
+
+// RemoveProductsInCartIDs removes the "products_in_cart" edge to CartProduct entities by IDs.
+func (uu *UserUpdate) RemoveProductsInCartIDs(ids ...uuid.UUID) *UserUpdate {
+	uu.mutation.RemoveProductsInCartIDs(ids...)
+	return uu
+}
+
+// RemoveProductsInCart removes "products_in_cart" edges to CartProduct entities.
+func (uu *UserUpdate) RemoveProductsInCart(c ...*CartProduct) *UserUpdate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uu.RemoveProductsInCartIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -193,6 +231,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldPassword,
 		})
 	}
+	if uu.mutation.ProductsInCartCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ProductsInCartTable,
+			Columns: []string{user.ProductsInCartColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: cartproduct.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedProductsInCartIDs(); len(nodes) > 0 && !uu.mutation.ProductsInCartCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ProductsInCartTable,
+			Columns: []string{user.ProductsInCartColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: cartproduct.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.ProductsInCartIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ProductsInCartTable,
+			Columns: []string{user.ProductsInCartColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: cartproduct.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -250,9 +342,45 @@ func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
 	return uuo
 }
 
+// AddProductsInCartIDs adds the "products_in_cart" edge to the CartProduct entity by IDs.
+func (uuo *UserUpdateOne) AddProductsInCartIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.AddProductsInCartIDs(ids...)
+	return uuo
+}
+
+// AddProductsInCart adds the "products_in_cart" edges to the CartProduct entity.
+func (uuo *UserUpdateOne) AddProductsInCart(c ...*CartProduct) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uuo.AddProductsInCartIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
+}
+
+// ClearProductsInCart clears all "products_in_cart" edges to the CartProduct entity.
+func (uuo *UserUpdateOne) ClearProductsInCart() *UserUpdateOne {
+	uuo.mutation.ClearProductsInCart()
+	return uuo
+}
+
+// RemoveProductsInCartIDs removes the "products_in_cart" edge to CartProduct entities by IDs.
+func (uuo *UserUpdateOne) RemoveProductsInCartIDs(ids ...uuid.UUID) *UserUpdateOne {
+	uuo.mutation.RemoveProductsInCartIDs(ids...)
+	return uuo
+}
+
+// RemoveProductsInCart removes "products_in_cart" edges to CartProduct entities.
+func (uuo *UserUpdateOne) RemoveProductsInCart(c ...*CartProduct) *UserUpdateOne {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uuo.RemoveProductsInCartIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -401,6 +529,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Value:  value,
 			Column: user.FieldPassword,
 		})
+	}
+	if uuo.mutation.ProductsInCartCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ProductsInCartTable,
+			Columns: []string{user.ProductsInCartColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: cartproduct.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedProductsInCartIDs(); len(nodes) > 0 && !uuo.mutation.ProductsInCartCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ProductsInCartTable,
+			Columns: []string{user.ProductsInCartColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: cartproduct.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.ProductsInCartIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ProductsInCartTable,
+			Columns: []string{user.ProductsInCartColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: cartproduct.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues

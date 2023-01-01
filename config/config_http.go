@@ -7,6 +7,7 @@ type ConfigHTTP struct {
 	ProductServiceHost string
 	GatewayServiceHost string
 	ImageServiceHost   string
+	CartServiceHost string
 }
 
 func NewConfigHTTP() *ConfigHTTP {
@@ -15,5 +16,6 @@ func NewConfigHTTP() *ConfigHTTP {
 		ProductServiceHost: os.Getenv("PRODUCT_SERVICE_HOST"),
 		GatewayServiceHost: os.Getenv("GATEWAY_SERVICE_HOST"),
 		ImageServiceHost:   os.Getenv("IMAGE_SERVICE_HOST"),
+		CartServiceHost: os.Getenv("CART_SERVICE_HOST"),
 	}
 }

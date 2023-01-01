@@ -4,9 +4,11 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	"math"
+	"yukiko-shop/internal/repository/ent/cartproduct"
 	"yukiko-shop/internal/repository/ent/category"
 	"yukiko-shop/internal/repository/ent/predicate"
 	"yukiko-shop/internal/repository/ent/product"
@@ -27,7 +29,8 @@ type ProductQuery struct {
 	fields     []string
 	predicates []predicate.Product
 	// eager-loading edges.
-	withCategory *CategoryQuery
+	withCategory       *CategoryQuery
+	withProductsInCart *CartProductQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,6 +82,28 @@ func (pq *ProductQuery) QueryCategory() *CategoryQuery {
 			sqlgraph.From(product.Table, product.FieldID, selector),
 			sqlgraph.To(category.Table, category.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, product.CategoryTable, product.CategoryColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryProductsInCart chains the current query on the "products_in_cart" edge.
+func (pq *ProductQuery) QueryProductsInCart() *CartProductQuery {
+	query := &CartProductQuery{config: pq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, selector),
+			sqlgraph.To(cartproduct.Table, cartproduct.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.ProductsInCartTable, product.ProductsInCartColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -262,12 +287,13 @@ func (pq *ProductQuery) Clone() *ProductQuery {
 		return nil
 	}
 	return &ProductQuery{
-		config:       pq.config,
-		limit:        pq.limit,
-		offset:       pq.offset,
-		order:        append([]OrderFunc{}, pq.order...),
-		predicates:   append([]predicate.Product{}, pq.predicates...),
-		withCategory: pq.withCategory.Clone(),
+		config:             pq.config,
+		limit:              pq.limit,
+		offset:             pq.offset,
+		order:              append([]OrderFunc{}, pq.order...),
+		predicates:         append([]predicate.Product{}, pq.predicates...),
+		withCategory:       pq.withCategory.Clone(),
+		withProductsInCart: pq.withProductsInCart.Clone(),
 		// clone intermediate query.
 		sql:    pq.sql.Clone(),
 		path:   pq.path,
@@ -283,6 +309,17 @@ func (pq *ProductQuery) WithCategory(opts ...func(*CategoryQuery)) *ProductQuery
 		opt(query)
 	}
 	pq.withCategory = query
+	return pq
+}
+
+// WithProductsInCart tells the query-builder to eager-load the nodes that are connected to
+// the "products_in_cart" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *ProductQuery) WithProductsInCart(opts ...func(*CartProductQuery)) *ProductQuery {
+	query := &CartProductQuery{config: pq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withProductsInCart = query
 	return pq
 }
 
@@ -351,8 +388,9 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 	var (
 		nodes       = []*Product{}
 		_spec       = pq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			pq.withCategory != nil,
+			pq.withProductsInCart != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -398,6 +436,31 @@ func (pq *ProductQuery) sqlAll(ctx context.Context) ([]*Product, error) {
 			for i := range nodes {
 				nodes[i].Edges.Category = n
 			}
+		}
+	}
+
+	if query := pq.withProductsInCart; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[uuid.UUID]*Product)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.ProductsInCart = []*CartProduct{}
+		}
+		query.Where(predicate.CartProduct(func(s *sql.Selector) {
+			s.Where(sql.InValues(product.ProductsInCartColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.ProductID
+			node, ok := nodeids[fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "product_id" returned %v for node %v`, fk, n.ID)
+			}
+			node.Edges.ProductsInCart = append(node.Edges.ProductsInCart, n)
 		}
 	}
 

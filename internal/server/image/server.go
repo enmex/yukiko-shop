@@ -1,14 +1,11 @@
 package photo
 
 import (
-	spec "yukiko-shop/internal/generated/spec/image"
-	"yukiko-shop/internal/interfaces"
-	"yukiko-shop/internal/repository/ent"
-
-	"entgo.io/ent/dialect/sql"
 	"github.com/go-chi/chi/v5"
 	"github.com/rs/cors"
 	"github.com/sirupsen/logrus"
+	spec "yukiko-shop/internal/generated/spec/image"
+	"yukiko-shop/internal/interfaces"
 )
 
 type Server struct {
@@ -34,9 +31,4 @@ func NewServerOptions() (spec.ChiServerOptions, error) {
 		BaseRouter:  r,
 		Middlewares: []spec.MiddlewareFunc{},
 	}, nil
-}
-
-func NewDBClient(driver *sql.Driver) (*ent.Client, error) {
-	client := ent.NewClient(ent.Driver(driver))
-	return client, nil
 }

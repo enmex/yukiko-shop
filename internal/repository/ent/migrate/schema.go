@@ -8,6 +8,36 @@ import (
 )
 
 var (
+	// CartProductsColumns holds the columns for the "cart_products" table.
+	CartProductsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "photo_url", Type: field.TypeString, Nullable: true},
+		{Name: "price", Type: field.TypeFloat64},
+		{Name: "quantity", Type: field.TypeInt},
+		{Name: "product_id", Type: field.TypeUUID},
+		{Name: "customer_id", Type: field.TypeUUID},
+	}
+	// CartProductsTable holds the schema information for the "cart_products" table.
+	CartProductsTable = &schema.Table{
+		Name:       "cart_products",
+		Columns:    CartProductsColumns,
+		PrimaryKey: []*schema.Column{CartProductsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "cart_products_products_products_in_cart",
+				Columns:    []*schema.Column{CartProductsColumns[5]},
+				RefColumns: []*schema.Column{ProductsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "cart_products_users_products_in_cart",
+				Columns:    []*schema.Column{CartProductsColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// CategoriesColumns holds the columns for the "categories" table.
 	CategoriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -70,6 +100,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CartProductsTable,
 		CategoriesTable,
 		ProductsTable,
 		UsersTable,
@@ -77,6 +108,8 @@ var (
 )
 
 func init() {
+	CartProductsTable.ForeignKeys[0].RefTable = ProductsTable
+	CartProductsTable.ForeignKeys[1].RefTable = UsersTable
 	CategoriesTable.ForeignKeys[0].RefTable = CategoriesTable
 	ProductsTable.ForeignKeys[0].RefTable = CategoriesTable
 }

@@ -16,6 +16,9 @@ type ServerInterface interface {
 	// Авторизация пользователя
 	// (GET /auth/access)
 	GetAuthAccess(w http.ResponseWriter, r *http.Request, params GetAuthAccessParams)
+	// Обновление токена
+	// (GET /auth/refreshToken)
+	GetAuthRefreshToken(w http.ResponseWriter, r *http.Request, params GetAuthRefreshTokenParams)
 	// Отправить код на почту
 	// (POST /auth/sendVerifyCode)
 	PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request)
@@ -58,6 +61,37 @@ func (siw *ServerInterfaceWrapper) GetAuthAccess(w http.ResponseWriter, r *http.
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetAuthAccess(w, r, params)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetAuthRefreshToken operation middleware
+func (siw *ServerInterfaceWrapper) GetAuthRefreshToken(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetAuthRefreshTokenParams
+
+	// ------------- Optional query parameter "user" -------------
+	if paramValue := r.URL.Query().Get("user"); paramValue != "" {
+
+	}
+
+	err = runtime.BindQueryParameter("form", true, false, "user", r.URL.Query(), &params.User)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "user", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetAuthRefreshToken(w, r, params)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -227,6 +261,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/auth/access", wrapper.GetAuthAccess)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/auth/refreshToken", wrapper.GetAuthRefreshToken)
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/auth/sendVerifyCode", wrapper.PostAuthSendVerifyCode)

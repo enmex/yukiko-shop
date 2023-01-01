@@ -4,6 +4,7 @@ package ent
 
 import (
 	"time"
+	"yukiko-shop/internal/repository/ent/cartproduct"
 	"yukiko-shop/internal/repository/ent/category"
 	"yukiko-shop/internal/repository/ent/product"
 	"yukiko-shop/internal/repository/ent/user"
@@ -16,6 +17,12 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	cartproductFields := schema.CartProduct{}.Fields()
+	_ = cartproductFields
+	// cartproductDescID is the schema descriptor for id field.
+	cartproductDescID := cartproductFields[0].Descriptor()
+	// cartproduct.DefaultID holds the default value on creation for the id field.
+	cartproduct.DefaultID = cartproductDescID.Default.(func() uuid.UUID)
 	categoryFields := schema.Category{}.Fields()
 	_ = categoryFields
 	// categoryDescID is the schema descriptor for id field.

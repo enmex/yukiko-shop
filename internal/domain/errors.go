@@ -12,4 +12,5 @@ var (
 	ProductAlreadyExistsErr  = errors.New("product with this name already exists")
 	ProductNotFoundErr       = errors.New("product not found")
 	CategoryAlreadyExistsErr = errors.New("category with this name already exists")
+	CartProductAlreadyExistsErr = errors.New("this product is already in the cart")
 )

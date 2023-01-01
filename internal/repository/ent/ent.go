@@ -5,6 +5,7 @@ package ent
 import (
 	"errors"
 	"fmt"
+	"yukiko-shop/internal/repository/ent/cartproduct"
 	"yukiko-shop/internal/repository/ent/category"
 	"yukiko-shop/internal/repository/ent/product"
 	"yukiko-shop/internal/repository/ent/user"
@@ -31,9 +32,10 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		category.Table: category.ValidColumn,
-		product.Table:  product.ValidColumn,
-		user.Table:     user.ValidColumn,
+		cartproduct.Table: cartproduct.ValidColumn,
+		category.Table:    category.ValidColumn,
+		product.Table:     product.ValidColumn,
+		user.Table:        user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

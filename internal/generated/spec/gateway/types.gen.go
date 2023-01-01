@@ -16,6 +16,14 @@ const (
 	GetAccessTypeResponseAccessTypeMANAGER GetAccessTypeResponseAccessType = "MANAGER"
 )
 
+// AddProductToCartRequest defines model for AddProductToCartRequest.
+type AddProductToCartRequest struct {
+	Name      string  `json:"name"`
+	PhotoUrl  string  `json:"photoUrl"`
+	Price     float64 `json:"price"`
+	ProductID string  `json:"productID"`
+}
+
 // CreateCategoryRequest defines model for CreateCategoryRequest.
 type CreateCategoryRequest struct {
 	Id       string  `json:"id"`
@@ -67,6 +75,11 @@ type SignUpRequest struct {
 	Password  string `json:"password"`
 }
 
+// UpdateCartProductRequest defines model for UpdateCartProductRequest.
+type UpdateCartProductRequest struct {
+	Quantity int `json:"quantity"`
+}
+
 // CategoryID defines model for categoryID.
 type CategoryID string
 
@@ -84,6 +97,12 @@ type PostAuthSignInJSONBody SignInRequest
 
 // PostAuthSignUpJSONBody defines parameters for PostAuthSignUp.
 type PostAuthSignUpJSONBody SignUpRequest
+
+// PostCartJSONBody defines parameters for PostCart.
+type PostCartJSONBody AddProductToCartRequest
+
+// PatchCartProductIDJSONBody defines parameters for PatchCartProductID.
+type PatchCartProductIDJSONBody UpdateCartProductRequest
 
 // GetCategoriesParams defines parameters for GetCategories.
 type GetCategoriesParams struct {
@@ -112,6 +131,12 @@ type PostAuthSignInJSONRequestBody PostAuthSignInJSONBody
 
 // PostAuthSignUpJSONRequestBody defines body for PostAuthSignUp for application/json ContentType.
 type PostAuthSignUpJSONRequestBody PostAuthSignUpJSONBody
+
+// PostCartJSONRequestBody defines body for PostCart for application/json ContentType.
+type PostCartJSONRequestBody PostCartJSONBody
+
+// PatchCartProductIDJSONRequestBody defines body for PatchCartProductID for application/json ContentType.
+type PatchCartProductIDJSONRequestBody PatchCartProductIDJSONBody
 
 // PostCategoriesJSONRequestBody defines body for PostCategories for application/json ContentType.
 type PostCategoriesJSONRequestBody PostCategoriesJSONBody

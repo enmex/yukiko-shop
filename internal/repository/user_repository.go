@@ -72,3 +72,18 @@ func (repo *UserRepository) GetUserAccessType(ctx context.Context, userDomain *d
 
 	return &accessType, nil
 }
+
+func (repo *UserRepository) GetUserByID(ctx context.Context, userDomain *domain.User) (*ent.User, error) {
+	userEnt, err := repo.Client.User.
+        Query().
+        Where(user.IDEQ(userDomain.ID)).
+        Only(ctx)
+    if err!= nil {
+		if strings.Contains(err.Error(), "not found") {
+			return nil, domain.UserNotFoundErr
+		}	
+        return nil, err
+    }
+
+	return userEnt, nil
+}

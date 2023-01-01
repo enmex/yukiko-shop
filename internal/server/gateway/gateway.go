@@ -74,7 +74,7 @@ func (s Server) PostAuthSignIn(w http.ResponseWriter, r *http.Request) {
 func (s Server) GetAuthAccess(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	userID := middleware.GetUserIdFromContext(ctx)
-	
+
 	var url string
 	if userID == nil {
 		url = fmt.Sprintf("http://%s/auth/access", s.cfg.AuthServiceHost)
@@ -88,6 +88,28 @@ func (s Server) GetAuthAccess(w http.ResponseWriter, r *http.Request) {
 			Message: err.Error(),
 		})
 		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}
+
+func (s Server) GetAuthRefreshToken(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := middleware.GetUserIdFromContext(ctx)
+
+	if userID == nil {
+		response.JSON(w, http.StatusUnauthorized, spec.ErrorResponse{
+            Message: "user id is empty",
+        })
+		return
+	}
+
+	res, err := httpRequest.Get(fmt.Sprintf("http://%s/auth/refreshToken?user=%s", s.cfg.AuthServiceHost, userID))
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+            Message: err.Error(),
+        })
+        return
 	}
 
 	response.Reply(w, res.Code, []byte(*res.Body))
@@ -250,6 +272,97 @@ func (s Server) PostImages(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) DeleteImagesImageID(w http.ResponseWriter, r *http.Request, imageID spec.ImageID) {
 	res, err := httpRequest.Delete(fmt.Sprintf("http://%s/%s", s.cfg.ImageServiceHost, imageID))
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}
+
+func (s Server) DeleteCart(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := middleware.GetUserIdFromContext(ctx)
+
+	res, err := httpRequest.Delete(fmt.Sprintf("http://%s/cart?user=%s", s.cfg.CartServiceHost, userID))
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}
+	
+func (s Server) GetCart(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+    userID := middleware.GetUserIdFromContext(ctx)
+
+    res, err := httpRequest.Get(fmt.Sprintf("http://%s/cart?user=%s", s.cfg.CartServiceHost, userID))
+    if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}
+	
+func (s Server) PostCart(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+    userID := middleware.GetUserIdFromContext(ctx)
+
+	var request spec.AddProductToCartRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err!= nil {
+		response.JSON(w, http.StatusBadRequest, spec.ErrorResponse{
+            Message: err.Error(),
+        })
+        return
+	}
+
+    res, err := httpRequest.Post(fmt.Sprintf("http://%s/cart?user=%s", s.cfg.CartServiceHost, userID), request)
+    if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}
+	
+func (s Server) DeleteCartProductID(w http.ResponseWriter, r *http.Request, productID spec.ProductID) {
+	ctx := r.Context()
+	userID := middleware.GetUserIdFromContext(ctx)
+
+	res, err := httpRequest.Delete(fmt.Sprintf("http://%s/cart/%s?user=%s", s.cfg.CartServiceHost, string(productID), userID))
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	response.Reply(w, res.Code, []byte(*res.Body))
+}
+	
+func (s Server) PatchCartProductID(w http.ResponseWriter, r *http.Request, productID spec.ProductID) {
+	ctx := r.Context()
+	userID := middleware.GetUserIdFromContext(ctx)
+
+	var request spec.UpdateCartProductRequest
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+			Message: err.Error(),
+		})
+		return
+	}
+
+	res, err := httpRequest.Patch(fmt.Sprintf("http://%s/cart/%s?user=%s", s.cfg.CartServiceHost, string(productID), userID), request)
 	if err != nil {
 		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
 			Message: err.Error(),

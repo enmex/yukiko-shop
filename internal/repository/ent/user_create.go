@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"yukiko-shop/internal/repository/ent/cartproduct"
 	"yukiko-shop/internal/repository/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -70,6 +71,21 @@ func (uc *UserCreate) SetNillableID(u *uuid.UUID) *UserCreate {
 		uc.SetID(*u)
 	}
 	return uc
+}
+
+// AddProductsInCartIDs adds the "products_in_cart" edge to the CartProduct entity by IDs.
+func (uc *UserCreate) AddProductsInCartIDs(ids ...uuid.UUID) *UserCreate {
+	uc.mutation.AddProductsInCartIDs(ids...)
+	return uc
+}
+
+// AddProductsInCart adds the "products_in_cart" edges to the CartProduct entity.
+func (uc *UserCreate) AddProductsInCart(c ...*CartProduct) *UserCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uc.AddProductsInCartIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -250,6 +266,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldPassword,
 		})
 		_node.Password = value
+	}
+	if nodes := uc.mutation.ProductsInCartIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.ProductsInCartTable,
+			Columns: []string{user.ProductsInCartColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: cartproduct.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

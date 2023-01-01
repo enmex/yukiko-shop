@@ -35,5 +35,6 @@ func (Product) Edges() []ent.Edge {
 			Unique().
 			Field("category_id").
 			Required(),
+		edge.To("products_in_cart", CartProduct.Type),
 	}
 }

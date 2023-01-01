@@ -11,6 +11,7 @@ import (
 type UserRepository interface {
 	CreateUser(ctx context.Context, user *domain.User) (*ent.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*ent.User, error)
+	GetUserByID(ctx context.Context, user *domain.User) (*ent.User, error)
 	GetUserAccessType(ctx context.Context, user *domain.User) (*string, error)
 }
 
@@ -32,4 +33,12 @@ type CategoryRepository interface {
 	UpdateCategoryPhotoUrl(ctx context.Context, categoryID uuid.UUID, photoUrl string) (*ent.Category, error)
 	UpdateCategoriesPhotoUrl(ctx context.Context, categories []*domain.Category) error
 	GetCategoriesIds(ctx context.Context) ([]*ent.Category, error)
+}
+
+type CartRepository interface {
+	AddProductToCart(ctx context.Context, product *domain.CartProduct) error
+	DeleteProductFromCart(ctx context.Context, product *domain.CartProduct) error
+	GetProductsFromCart(ctx context.Context, user *domain.User) ([]*ent.CartProduct, error)
+	UpdateProductInCart(ctx context.Context, product *domain.CartProduct) error
+	DeleteAllProductsFromCart(ctx context.Context, user *domain.User) error
 }

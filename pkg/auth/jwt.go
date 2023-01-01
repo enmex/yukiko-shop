@@ -9,8 +9,8 @@ import (
 var _ JwtAuthenticator = (*JwtAuthenticate)(nil)
 
 type JwtAuthenticator interface {
-	GenerateAccessToken(accessClaims AccessClaims) (string, error)
-	ParseAccessToken(jwtToken string) (*AccessClaims, error)
+	GenerateAccessToken(accessClaims Claims) (string, error)
+	ParseAccessToken(jwtToken string) (*Claims, error)
 }
 
 type JwtAuthenticate struct {
@@ -23,7 +23,7 @@ func NewJwtAuthenticate(conf *Config) *JwtAuthenticate {
 	}
 }
 
-func (j *JwtAuthenticate) GenerateAccessToken(accessClaims AccessClaims) (string, error) {
+func (j *JwtAuthenticate) GenerateAccessToken(accessClaims Claims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
 	jwtToken, err := token.SignedString(j.conf.Secret)
 	if err != nil {
@@ -33,8 +33,8 @@ func (j *JwtAuthenticate) GenerateAccessToken(accessClaims AccessClaims) (string
 	return jwtToken, nil
 }
 
-func (j *JwtAuthenticate) ParseAccessToken(jwtToken string) (*AccessClaims, error) {
-	ac := AccessClaims{}
+func (j *JwtAuthenticate) ParseAccessToken(jwtToken string) (*Claims, error) {
+	ac := Claims{}
 	token, err := jwt.ParseWithClaims(jwtToken, &ac, func(token *jwt.Token) (interface{}, error) {
 		return j.conf.Secret, nil
 	})
@@ -43,7 +43,7 @@ func (j *JwtAuthenticate) ParseAccessToken(jwtToken string) (*AccessClaims, erro
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(*AccessClaims); ok && token.Valid {
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
 		claims.Token = jwtToken
 		return claims, nil
 	}

@@ -93,6 +93,21 @@ services:
         aliases:
           - yukiko.image.loc
 
+  cart:
+    container_name: cart
+    build:
+      context: .
+      dockerfile: ./docker/cart.dockerfile
+    env_file:
+      - .env
+    ports:
+      - ${CART_HTTP_PORT:-8084}:8084
+    networks:
+      app_network:
+        ipv4_address: 171.4.4.15
+        aliases:
+          - yukiko.cart.loc
+
   api-gateway:
     container_name: api-gateway
     build:

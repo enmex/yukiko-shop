@@ -120,3 +120,20 @@ func (s Server) GetAuthAccess(w http.ResponseWriter, r *http.Request, params spe
 
 	response.JSON(w, http.StatusOK, res)
 }
+
+func (s Server) GetAuthRefreshToken(w http.ResponseWriter, r *http.Request, params spec.GetAuthRefreshTokenParams) {
+	ctx := r.Context()
+	userID := uuid.MustParse(*params.User)
+
+	res, err := s.authUseCase.RefreshToken(ctx, &domain.User{
+		ID: userID,
+	})
+	if err != nil {
+		response.JSON(w, http.StatusInternalServerError, spec.ErrorResponse{
+            Message: err.Error(),
+        })
+		return
+	}
+
+	response.JSON(w, http.StatusOK, res)
+}

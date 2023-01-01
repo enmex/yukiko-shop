@@ -71,7 +71,7 @@ type Error struct {
 }
 
 func GetUserIdFromContext(ctx context.Context) *uuid.UUID {
-	claims, ok := ctx.Value(auth.UserContextKey).(auth.AccessClaims)
+	claims, ok := ctx.Value(auth.UserContextKey).(auth.Claims)
 
 	if !ok {
 		return nil
@@ -80,13 +80,13 @@ func GetUserIdFromContext(ctx context.Context) *uuid.UUID {
 	return &claims.UserID
 }
 
-func getAccessClaims(r *http.Request, authenticator auth.Authenticator, jwtAuth auth.JwtAuthenticator) (*auth.AccessClaims, error) {
+func getAccessClaims(r *http.Request, authenticator auth.Authenticator, jwtAuth auth.JwtAuthenticator) (*auth.Claims, error) {
 	jwt, err := authenticator.GetToken(r)
 	if err != nil || jwt == nil {
 		return nil, errors.New("invalid security token")
 	}
 
-	var accessClaims *auth.AccessClaims
+	var accessClaims *auth.Claims
 	cleanToken := auth.GetBearer(*jwt)
 	accessClaims, err = jwtAuth.ParseAccessToken(cleanToken)
 	if err != nil {

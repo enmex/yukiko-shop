@@ -9,6 +9,7 @@ import (
 
 	"yukiko-shop/internal/repository/ent/migrate"
 
+	"yukiko-shop/internal/repository/ent/cartproduct"
 	"yukiko-shop/internal/repository/ent/category"
 	"yukiko-shop/internal/repository/ent/product"
 	"yukiko-shop/internal/repository/ent/user"
@@ -24,6 +25,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
+	// CartProduct is the client for interacting with the CartProduct builders.
+	CartProduct *CartProductClient
 	// Category is the client for interacting with the Category builders.
 	Category *CategoryClient
 	// Product is the client for interacting with the Product builders.
@@ -43,6 +46,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
+	c.CartProduct = NewCartProductClient(c.config)
 	c.Category = NewCategoryClient(c.config)
 	c.Product = NewProductClient(c.config)
 	c.User = NewUserClient(c.config)
@@ -77,11 +81,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Category: NewCategoryClient(cfg),
-		Product:  NewProductClient(cfg),
-		User:     NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		CartProduct: NewCartProductClient(cfg),
+		Category:    NewCategoryClient(cfg),
+		Product:     NewProductClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
@@ -99,18 +104,19 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:      ctx,
-		config:   cfg,
-		Category: NewCategoryClient(cfg),
-		Product:  NewProductClient(cfg),
-		User:     NewUserClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		CartProduct: NewCartProductClient(cfg),
+		Category:    NewCategoryClient(cfg),
+		Product:     NewProductClient(cfg),
+		User:        NewUserClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Category.
+//		CartProduct.
 //		Query().
 //		Count(ctx)
 //
@@ -133,9 +139,132 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
+	c.CartProduct.Use(hooks...)
 	c.Category.Use(hooks...)
 	c.Product.Use(hooks...)
 	c.User.Use(hooks...)
+}
+
+// CartProductClient is a client for the CartProduct schema.
+type CartProductClient struct {
+	config
+}
+
+// NewCartProductClient returns a client for the CartProduct from the given config.
+func NewCartProductClient(c config) *CartProductClient {
+	return &CartProductClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `cartproduct.Hooks(f(g(h())))`.
+func (c *CartProductClient) Use(hooks ...Hook) {
+	c.hooks.CartProduct = append(c.hooks.CartProduct, hooks...)
+}
+
+// Create returns a create builder for CartProduct.
+func (c *CartProductClient) Create() *CartProductCreate {
+	mutation := newCartProductMutation(c.config, OpCreate)
+	return &CartProductCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of CartProduct entities.
+func (c *CartProductClient) CreateBulk(builders ...*CartProductCreate) *CartProductCreateBulk {
+	return &CartProductCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for CartProduct.
+func (c *CartProductClient) Update() *CartProductUpdate {
+	mutation := newCartProductMutation(c.config, OpUpdate)
+	return &CartProductUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CartProductClient) UpdateOne(cp *CartProduct) *CartProductUpdateOne {
+	mutation := newCartProductMutation(c.config, OpUpdateOne, withCartProduct(cp))
+	return &CartProductUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CartProductClient) UpdateOneID(id uuid.UUID) *CartProductUpdateOne {
+	mutation := newCartProductMutation(c.config, OpUpdateOne, withCartProductID(id))
+	return &CartProductUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for CartProduct.
+func (c *CartProductClient) Delete() *CartProductDelete {
+	mutation := newCartProductMutation(c.config, OpDelete)
+	return &CartProductDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a delete builder for the given entity.
+func (c *CartProductClient) DeleteOne(cp *CartProduct) *CartProductDeleteOne {
+	return c.DeleteOneID(cp.ID)
+}
+
+// DeleteOneID returns a delete builder for the given id.
+func (c *CartProductClient) DeleteOneID(id uuid.UUID) *CartProductDeleteOne {
+	builder := c.Delete().Where(cartproduct.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CartProductDeleteOne{builder}
+}
+
+// Query returns a query builder for CartProduct.
+func (c *CartProductClient) Query() *CartProductQuery {
+	return &CartProductQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a CartProduct entity by its id.
+func (c *CartProductClient) Get(ctx context.Context, id uuid.UUID) (*CartProduct, error) {
+	return c.Query().Where(cartproduct.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CartProductClient) GetX(ctx context.Context, id uuid.UUID) *CartProduct {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCustomer queries the customer edge of a CartProduct.
+func (c *CartProductClient) QueryCustomer(cp *CartProduct) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := cp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(cartproduct.Table, cartproduct.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, cartproduct.CustomerTable, cartproduct.CustomerColumn),
+		)
+		fromV = sqlgraph.Neighbors(cp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryProduct queries the product edge of a CartProduct.
+func (c *CartProductClient) QueryProduct(cp *CartProduct) *ProductQuery {
+	query := &ProductQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := cp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(cartproduct.Table, cartproduct.FieldID, id),
+			sqlgraph.To(product.Table, product.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, cartproduct.ProductTable, cartproduct.ProductColumn),
+		)
+		fromV = sqlgraph.Neighbors(cp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *CartProductClient) Hooks() []Hook {
+	return c.hooks.CartProduct
 }
 
 // CategoryClient is a client for the Category schema.
@@ -377,6 +506,22 @@ func (c *ProductClient) QueryCategory(pr *Product) *CategoryQuery {
 	return query
 }
 
+// QueryProductsInCart queries the products_in_cart edge of a Product.
+func (c *ProductClient) QueryProductsInCart(pr *Product) *CartProductQuery {
+	query := &CartProductQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := pr.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(product.Table, product.FieldID, id),
+			sqlgraph.To(cartproduct.Table, cartproduct.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, product.ProductsInCartTable, product.ProductsInCartColumn),
+		)
+		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *ProductClient) Hooks() []Hook {
 	return c.hooks.Product
@@ -465,6 +610,22 @@ func (c *UserClient) GetX(ctx context.Context, id uuid.UUID) *User {
 		panic(err)
 	}
 	return obj
+}
+
+// QueryProductsInCart queries the products_in_cart edge of a User.
+func (c *UserClient) QueryProductsInCart(u *User) *CartProductQuery {
+	query := &CartProductQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(cartproduct.Table, cartproduct.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.ProductsInCartTable, user.ProductsInCartColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
 }
 
 // Hooks returns the client hooks.

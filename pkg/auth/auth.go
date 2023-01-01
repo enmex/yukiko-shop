@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type AccessClaims struct {
+type Claims struct {
 	UserID             uuid.UUID `json:"user_id"`
 	AccessType         string    `json:"access_type"`
 	Token              string    `json:"token"`
@@ -44,7 +44,7 @@ func (a *Authenticate) GetToken(request *http.Request) (*string, error) {
 	return nil, nil
 }
 
-func (ac AccessClaims) WithContext(ctx context.Context) context.Context {
+func (ac Claims) WithContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, UserContextKey, ac)
 }
 

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"yukiko-shop/internal/repository/ent/cartproduct"
 	"yukiko-shop/internal/repository/ent/category"
 	"yukiko-shop/internal/repository/ent/product"
 
@@ -91,6 +92,21 @@ func (pc *ProductCreate) SetNillableID(u *uuid.UUID) *ProductCreate {
 // SetCategory sets the "category" edge to the Category entity.
 func (pc *ProductCreate) SetCategory(c *Category) *ProductCreate {
 	return pc.SetCategoryID(c.ID)
+}
+
+// AddProductsInCartIDs adds the "products_in_cart" edge to the CartProduct entity by IDs.
+func (pc *ProductCreate) AddProductsInCartIDs(ids ...uuid.UUID) *ProductCreate {
+	pc.mutation.AddProductsInCartIDs(ids...)
+	return pc
+}
+
+// AddProductsInCart adds the "products_in_cart" edges to the CartProduct entity.
+func (pc *ProductCreate) AddProductsInCart(c ...*CartProduct) *ProductCreate {
+	ids := make([]uuid.UUID, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return pc.AddProductsInCartIDs(ids...)
 }
 
 // Mutation returns the ProductMutation object of the builder.
@@ -288,6 +304,25 @@ func (pc *ProductCreate) createSpec() (*Product, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.CategoryID = nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.ProductsInCartIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   product.ProductsInCartTable,
+			Columns: []string{product.ProductsInCartColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: cartproduct.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

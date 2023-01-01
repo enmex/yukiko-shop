@@ -17,6 +17,9 @@ type ServerInterface interface {
 	// Авторизация пользователя
 	// (GET /auth/access)
 	GetAuthAccess(w http.ResponseWriter, r *http.Request)
+	// Обновление токена
+	// (GET /auth/refreshToken)
+	GetAuthRefreshToken(w http.ResponseWriter, r *http.Request)
 	// Отправить код на почту
 	// (POST /auth/sendVerifyCode)
 	PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request)
@@ -26,6 +29,21 @@ type ServerInterface interface {
 	// Регистрация пользователя
 	// (POST /auth/signUp)
 	PostAuthSignUp(w http.ResponseWriter, r *http.Request)
+	// Очистка корзины
+	// (DELETE /cart)
+	DeleteCart(w http.ResponseWriter, r *http.Request)
+	// Получение корзины
+	// (GET /cart)
+	GetCart(w http.ResponseWriter, r *http.Request)
+	// Добавление товара в корзину
+	// (POST /cart)
+	PostCart(w http.ResponseWriter, r *http.Request)
+	// Добавление товара в корзину
+	// (DELETE /cart/{productID})
+	DeleteCartProductID(w http.ResponseWriter, r *http.Request, productID ProductID)
+	// Обновление количества товара в корзине
+	// (PATCH /cart/{productID})
+	PatchCartProductID(w http.ResponseWriter, r *http.Request, productID ProductID)
 	// Получить список категорий
 	// (GET /categories)
 	GetCategories(w http.ResponseWriter, r *http.Request, params GetCategoriesParams)
@@ -82,6 +100,21 @@ func (siw *ServerInterfaceWrapper) GetAuthAccess(w http.ResponseWriter, r *http.
 	handler(w, r.WithContext(ctx))
 }
 
+// GetAuthRefreshToken operation middleware
+func (siw *ServerInterfaceWrapper) GetAuthRefreshToken(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetAuthRefreshToken(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
 // PostAuthSendVerifyCode operation middleware
 func (siw *ServerInterfaceWrapper) PostAuthSendVerifyCode(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -118,6 +151,103 @@ func (siw *ServerInterfaceWrapper) PostAuthSignUp(w http.ResponseWriter, r *http
 
 	var handler = func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PostAuthSignUp(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// DeleteCart operation middleware
+func (siw *ServerInterfaceWrapper) DeleteCart(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteCart(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// GetCart operation middleware
+func (siw *ServerInterfaceWrapper) GetCart(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetCart(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// PostCart operation middleware
+func (siw *ServerInterfaceWrapper) PostCart(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostCart(w, r)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// DeleteCartProductID operation middleware
+func (siw *ServerInterfaceWrapper) DeleteCartProductID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "productID" -------------
+	var productID ProductID
+
+	err = runtime.BindStyledParameter("simple", false, "productID", chi.URLParam(r, "productID"), &productID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "productID", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteCartProductID(w, r, productID)
+	}
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler(w, r.WithContext(ctx))
+}
+
+// PatchCartProductID operation middleware
+func (siw *ServerInterfaceWrapper) PatchCartProductID(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	var err error
+
+	// ------------- Path parameter "productID" -------------
+	var productID ProductID
+
+	err = runtime.BindStyledParameter("simple", false, "productID", chi.URLParam(r, "productID"), &productID)
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "productID", Err: err})
+		return
+	}
+
+	var handler = func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchCartProductID(w, r, productID)
 	}
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -489,6 +619,9 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 		r.Get(options.BaseURL+"/auth/access", wrapper.GetAuthAccess)
 	})
 	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/auth/refreshToken", wrapper.GetAuthRefreshToken)
+	})
+	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/auth/sendVerifyCode", wrapper.PostAuthSendVerifyCode)
 	})
 	r.Group(func(r chi.Router) {
@@ -496,6 +629,21 @@ func HandlerWithOptions(si ServerInterface, options ChiServerOptions) http.Handl
 	})
 	r.Group(func(r chi.Router) {
 		r.Post(options.BaseURL+"/auth/signUp", wrapper.PostAuthSignUp)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/cart", wrapper.DeleteCart)
+	})
+	r.Group(func(r chi.Router) {
+		r.Get(options.BaseURL+"/cart", wrapper.GetCart)
+	})
+	r.Group(func(r chi.Router) {
+		r.Post(options.BaseURL+"/cart", wrapper.PostCart)
+	})
+	r.Group(func(r chi.Router) {
+		r.Delete(options.BaseURL+"/cart/{productID}", wrapper.DeleteCartProductID)
+	})
+	r.Group(func(r chi.Router) {
+		r.Patch(options.BaseURL+"/cart/{productID}", wrapper.PatchCartProductID)
 	})
 	r.Group(func(r chi.Router) {
 		r.Get(options.BaseURL+"/categories", wrapper.GetCategories)

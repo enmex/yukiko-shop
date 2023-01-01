@@ -14,12 +14,19 @@ paths:
         - Shopping Cart
       description: Добавление товара в корзину
       summary: Добавление товара в корзину
+      parameters:
+        - in: query
+          required: true
+          name: user
+          schema:
+            type: string
+            format: uuid
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              - $ref: "#/components/schemas/AddProductToCartRequest"
+              $ref: "#/components/schemas/AddProductToCartRequest"
       responses:
         201:
           description: Все хорошо
@@ -30,18 +37,56 @@ paths:
         - Shopping Cart
       description: Очистка корзины
       summary: Очистка корзины
+      parameters:
+        - in: query
+          required: true
+          name: user
+          schema:
+            type: string
+            format: uuid
       responses:
         204:
           description: Все хорошо
         400:
           $ref: "#/components/responses/ErrorResponse"
-              
-  /cart/{productID}:
-    post:
+    get:
       tags:
         - Shopping Cart
-      description: Добавление товара в корзину
-      summary: Добавление товара в корзину
+      description: Получение корзины
+      summary: Получение корзины
+      parameters:
+        - in: query
+          required: true
+          name: user
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          $ref: "#/components/responses/GetCartResponse"
+        400:
+          $ref: "#/components/responses/ErrorResponse"
+
+  /cart/{productID}:
+    patch:
+      tags:
+        - Shopping Cart
+      description: Обновление количества товара в корзине
+      summary: Обновление количества товара в корзине
+      parameters:
+        - $ref: "#/components/parameters/productID"
+        - in: query
+          required: true
+          name: user
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCartProductRequest"
       responses:
         200:
           description: Все хорошо
@@ -50,6 +95,14 @@ paths:
         - Shopping Cart
       description: Добавление товара в корзину
       summary: Добавление товара в корзину
+      parameters:
+        - $ref: "#/components/parameters/productID"
+        - in: query
+          required: true
+          name: user
+          schema:
+            type: string
+            format: uuid
       responses:
         204:
           description: Все хорошо
@@ -59,25 +112,85 @@ components:
     Product:
       required:
         - id
+        - productID
+        - customerID
         - name
         - price
         - quantity
+        - photoUrl
       properties:
         id:
           type: string
           format: uuid
+        productID:
+          type: string
+          format: uuid
+        customerID:
+          type: string
+          format: uuid
         name:
+          type: string
+        photoUrl:
           type: string
         price:
           type: number
           format: double
         quantity:
           type: integer
+
+    Cart:
+      required:
+        - products
+        - totalPrice
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        totalPrice:
+          type: number
+          format: double
   
     AddProductToCartRequest:
-      allOf:
-        - type: object
-        - $ref: "#/components/schemas/Product"
+      type: object
+      required:
+        - name
+        - productID
+        - photoUrl
+        - price
+      properties:
+        name:
+          type: string
+        productID:
+          type: string
+          format: uuid
+        price:
+          type: number
+          format: double
+        photoUrl:
+          type: string
+
+    UpdateCartProductRequest:
+      type: object
+      required:
+        - quantity
+      properties:
+        quantity:
+          type: integer
+
+    GetCartResponse:
+      type: object
+      required:
+        - products
+        - totalPrice
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        totalPrice:
+          type: number
+          format: double
 
     ErrorResponse:
       type: object
@@ -88,9 +201,25 @@ components:
           type: string
 
   responses:
+    GetCartResponse:
+      description: Что-то не так
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/GetCartResponse"
+
     ErrorResponse:
       description: Что-то не так
       content:
         application/json:
           schema:
             $ref: "#/components/schemas/ErrorResponse"
+    
+  parameters:
+    productID:
+      name: productID
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid

@@ -94,32 +94,48 @@ func (u *AuthUseCase) SignUp(ctx context.Context, user *domain.User, verifyCode 
 		return nil, err
 	}
 
-	issuedAt := time.Now()
-	expiresAt := time.Now().Add(u.authCfg.ExpirationTime)
+	accessIssuedAt := time.Now()
+	accessExpiresAt := time.Now().Add(u.authCfg.AccessExpirationTime)
 
-	claims := auth.AccessClaims{
+	accessClaims := auth.Claims{
 		UserID:     userEnt.ID,
 		AccessType: string(userEnt.AccessType),
 		StandardClaims: jwt.StandardClaims{
-			IssuedAt:  issuedAt.Unix(),
-			ExpiresAt: expiresAt.Unix(),
+			IssuedAt:  accessIssuedAt.Unix(),
+			ExpiresAt: accessExpiresAt.Unix(),
 		},
 	}
 
-	jwtToken, err := u.jwtAuth.GenerateAccessToken(claims)
+	jwtAccessToken, err := u.jwtAuth.GenerateAccessToken(accessClaims)
+	if err != nil {
+		return nil, err
+	}
 
+	refreshIssuedAt := time.Now()
+	refreshExpiresAt := time.Now().Add(u.authCfg.RefreshExpirationTime)
+
+	refreshClaims := auth.Claims{
+		UserID:     userEnt.ID,
+		AccessType: string(userEnt.AccessType),
+		StandardClaims: jwt.StandardClaims{
+			IssuedAt:  refreshIssuedAt.Unix(),
+			ExpiresAt: refreshExpiresAt.Unix(),
+		},
+	}
+
+	jwtRefreshToken, err := u.jwtAuth.GenerateAccessToken(refreshClaims)
 	if err != nil {
 		return nil, err
 	}
 
 	return &spec.AuthResponse{
 		Access: spec.Token{
-			Token:     jwtToken,
-			ExpiresAt: expiresAt.UnixMilli(),
+			Token:     jwtAccessToken,
+			ExpiresAt: accessExpiresAt.UnixMilli(),
 		},
 		Refresh: spec.Token{
-			Token:     jwtToken,
-			ExpiresAt: expiresAt.UnixMilli(),
+			Token:     jwtRefreshToken,
+			ExpiresAt: refreshExpiresAt.UnixMilli(),
 		},
 	}, nil
 }
@@ -137,32 +153,48 @@ func (u *AuthUseCase) SignIn(ctx context.Context, user *domain.User) (*spec.Auth
 		return nil, domain.WrongCredentialsErr
 	}
 
-	issuedAt := time.Now()
-	expiresAt := time.Now().Add(u.authCfg.ExpirationTime)
+	accessIssuedAt := time.Now()
+	accessExpiresAt := time.Now().Add(u.authCfg.AccessExpirationTime)
 
-	claims := auth.AccessClaims{
+	accessClaims := auth.Claims{
 		UserID:     userEnt.ID,
 		AccessType: string(userEnt.AccessType),
 		StandardClaims: jwt.StandardClaims{
-			IssuedAt:  issuedAt.Unix(),
-			ExpiresAt: expiresAt.Unix(),
+			IssuedAt:  accessIssuedAt.Unix(),
+			ExpiresAt: accessExpiresAt.Unix(),
 		},
 	}
 
-	jwtToken, err := u.jwtAuth.GenerateAccessToken(claims)
+	jwtAccessToken, err := u.jwtAuth.GenerateAccessToken(accessClaims)
+	if err != nil {
+		return nil, err
+	}
 
+	refreshIssuedAt := time.Now()
+	refreshExpiresAt := time.Now().Add(u.authCfg.RefreshExpirationTime)
+
+	refreshClaims := auth.Claims{
+		UserID:     userEnt.ID,
+		AccessType: string(userEnt.AccessType),
+		StandardClaims: jwt.StandardClaims{
+			IssuedAt:  refreshIssuedAt.Unix(),
+			ExpiresAt: refreshExpiresAt.Unix(),
+		},
+	}
+
+	jwtRefreshToken, err := u.jwtAuth.GenerateAccessToken(refreshClaims)
 	if err != nil {
 		return nil, err
 	}
 
 	return &spec.AuthResponse{
 		Access: spec.Token{
-			Token:     jwtToken,
-			ExpiresAt: expiresAt.UnixMilli(),
+			Token:     jwtAccessToken,
+			ExpiresAt: accessExpiresAt.UnixMilli(),
 		},
 		Refresh: spec.Token{
-			Token:     jwtToken,
-			ExpiresAt: expiresAt.UnixMilli(),
+			Token:     jwtRefreshToken,
+			ExpiresAt: refreshExpiresAt.UnixMilli(),
 		},
 	}, nil
 }
@@ -175,5 +207,57 @@ func (u *AuthUseCase) GetAccessType(ctx context.Context, user *domain.User) (*sp
 
 	return &spec.GetAccessTypeResponse{
 		AccessType: spec.GetAccessTypeResponseAccessType(*accessType),
+	}, nil
+}
+
+func (u *AuthUseCase) RefreshToken(ctx context.Context, user *domain.User) (*spec.AuthResponse, error) {
+	userEnt, err := u.userRepo.GetUserByID(ctx, user)
+	if err!= nil {
+        return nil, err
+    }
+
+	accessIssuedAt := time.Now()
+	accessExpiresAt := time.Now().Add(u.authCfg.AccessExpirationTime)
+
+	accessClaims := auth.Claims{
+		UserID:     userEnt.ID,
+		AccessType: string(userEnt.AccessType),
+		StandardClaims: jwt.StandardClaims{
+			IssuedAt:  accessIssuedAt.Unix(),
+			ExpiresAt: accessExpiresAt.Unix(),
+		},
+	}
+
+	jwtAccessToken, err := u.jwtAuth.GenerateAccessToken(accessClaims)
+	if err != nil {
+		return nil, err
+	}
+
+	refreshIssuedAt := time.Now()
+	refreshExpiresAt := time.Now().Add(u.authCfg.RefreshExpirationTime)
+
+	refreshClaims := auth.Claims{
+		UserID:     userEnt.ID,
+		AccessType: string(userEnt.AccessType),
+		StandardClaims: jwt.StandardClaims{
+			IssuedAt:  refreshIssuedAt.Unix(),
+			ExpiresAt: refreshExpiresAt.Unix(),
+		},
+	}
+
+	jwtRefreshToken, err := u.jwtAuth.GenerateAccessToken(refreshClaims)
+	if err != nil {
+		return nil, err
+	}
+
+	return &spec.AuthResponse{
+		Access: spec.Token{
+			Token:     jwtAccessToken,
+			ExpiresAt: accessExpiresAt.UnixMilli(),
+		},
+		Refresh: spec.Token{
+			Token:     jwtRefreshToken,
+			ExpiresAt: refreshExpiresAt.UnixMilli(),
+		},
 	}, nil
 }

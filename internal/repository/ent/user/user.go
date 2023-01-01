@@ -23,8 +23,17 @@ const (
 	FieldAccessType = "access_type"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
+	// EdgeProductsInCart holds the string denoting the products_in_cart edge name in mutations.
+	EdgeProductsInCart = "products_in_cart"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// ProductsInCartTable is the table that holds the products_in_cart relation/edge.
+	ProductsInCartTable = "cart_products"
+	// ProductsInCartInverseTable is the table name for the CartProduct entity.
+	// It exists in this package in order to avoid circular dependency with the "cartproduct" package.
+	ProductsInCartInverseTable = "cart_products"
+	// ProductsInCartColumn is the table column denoting the products_in_cart relation/edge.
+	ProductsInCartColumn = "customer_id"
 )
 
 // Columns holds all SQL columns for user fields.
